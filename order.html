@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>document.documentElement.classList.add('js');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Place an order — Gaurav Design</title>
+<meta name="description" content="Order a poster, YouTube thumbnail, packaging design, or book layout from Gaurav Design">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFEDE2; --paper-alt:#E6E2D3; --ink:#1F2A38; --ink-soft:#4A5563;
+    --carbon-red:#B23A2E; --stamp-mustard:#C9922A; --ledger-green:#4C6B54;
+    --line:#C9C4B2; --white:#FFFDF8; --mono:'JetBrains Mono', monospace; --sans:'Work Sans', sans-serif;
+  }
+  [data-theme="dark"]{
+    --paper:#171A1E; --paper-alt:#1E2228; --ink:#ECE8DC; --ink-soft:#A9A79B;
+    --carbon-red:#E0574A; --stamp-mustard:#E0AC4D; --ledger-green:#7FA98C;
+    --line:#3A3E44; --white:#20242A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.5;}
+  a{color:inherit; text-decoration:none;}
+  .mono{font-family:var(--mono);}
+
+  header.nav{position:sticky; top:0; z-index:50; background:var(--white); border-bottom:1px solid var(--line);}
+  .nav-inner{display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:1080px; margin:0 auto;}
+  .back-link{font-family:var(--mono); font-size:.82rem; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:6px;}
+  .brand{font-weight:700; font-size:.95rem;}
+  .icon-btn{width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:var(--paper); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:.95rem;}
+
+  .page-head{padding:44px 24px 24px; text-align:center;}
+  .page-head .eyebrow{font-family:var(--mono); font-size:.7rem; color:var(--carbon-red); font-weight:700; letter-spacing:.08em; margin-bottom:10px;}
+  .page-head h1{font-size:1.6rem; font-weight:700;}
+  .page-head p{color:var(--ink-soft); font-size:.9rem; margin-top:8px;}
+
+  .form-wrap{max-width:640px; margin:0 auto; padding:0 24px 60px;}
+  .form-card{background:var(--white); border:1px solid var(--line); padding:30px;}
+  .form-row{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;}
+  @media(max-width:560px){.form-row{grid-template-columns:1fr;}}
+  .field{margin-bottom:16px;}
+  label{display:block; font-size:.76rem; font-weight:700; margin-bottom:6px; font-family:var(--mono); color:var(--ink-soft);}
+  input, select, textarea{width:100%; padding:11px 12px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:.92rem; border-radius:2px;}
+  input:focus, select:focus, textarea:focus{outline:2px solid var(--carbon-red); outline-offset:1px;}
+  .field-error{display:none; color:var(--carbon-red); font-size:.76rem; font-weight:600; margin-top:5px; font-family:var(--mono);}
+  .field.invalid input, .field.invalid select, .field.invalid textarea{border-color:var(--carbon-red); outline:1px solid var(--carbon-red);}
+  .field.invalid .field-error{display:block;}
+
+  .price-preview{background:var(--paper-alt); border:1px solid var(--line); padding:14px 16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; font-family:var(--mono); font-size:.86rem;}
+  .price-preview .amt{font-weight:700; color:var(--carbon-red); font-size:1.1rem;}
+
+  .agree-row{display:flex; align-items:flex-start; gap:10px; margin-bottom:18px; font-size:.84rem; color:var(--ink-soft);}
+  .agree-row input{width:auto; margin-top:3px;}
+  .agree-row a{color:var(--carbon-red); font-weight:700;}
+
+  .submit-row{display:flex; justify-content:flex-end;}
+  .btn{display:inline-flex; align-items:center; gap:8px; padding:13px 22px; border-radius:2px; font-weight:700; font-size:.9rem; border:none; cursor:pointer; background:var(--carbon-red); color:#fff; transition:transform .15s;}
+  .btn:hover{transform:translateY(-2px);}
+  .btn:disabled{opacity:.6; cursor:not-allowed; transform:none;}
+  .form-note{font-size:.78rem; color:var(--ink-soft); margin-top:14px;}
+
+
+  .success-card{
+    background:var(--white); border:1px solid var(--ledger-green); padding:40px 30px; text-align:center;
+  }
+  .success-icon{
+    width:52px; height:52px; border-radius:50%; background:var(--ledger-green); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:1.6rem; font-weight:800;
+    margin:0 auto 16px;
+  }
+  .success-card h2{font-size:1.3rem; font-weight:700; margin-bottom:8px;}
+  .success-card p{color:var(--ink-soft); font-size:.88rem; margin-bottom:16px;}
+  .order-id-box{
+    font-family:var(--mono); font-size:1.4rem; font-weight:700; color:var(--carbon-red);
+    background:var(--paper-alt); border:1px dashed var(--line); padding:14px; letter-spacing:.05em;
+  }
+
+  footer{padding:32px 24px; text-align:center; border-top:1px solid var(--line);}
+  footer p{color:var(--ink-soft); font-size:.8rem;}
+</style>
+</head>
+<body data-theme="light">
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="back-link">← Back to home</a>
+    <div class="brand">GAURAV DESIGN</div>
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
+  </div>
+</header>
+
+<div class="page-head">
+  <div class="eyebrow">PLACE AN ORDER</div>
+  <h1>Fill the order form</h1>
+  <p>Takes about two minutes.</p>
+</div>
+
+<div class="form-wrap">
+  <form class="form-card" name="order" id="orderForm" enctype="multipart/form-data">
+    <p style="display:none;"><label>Don't fill this: <input name="bot-field"></label></p>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Full name</label>
+        <input type="text" name="name" required>
+        <span class="field-error" data-error-for="name"></span>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="you@example.com" required>
+        <span class="field-error" data-error-for="email"></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>WhatsApp number</label>
+      <input type="tel" name="phone" placeholder="10-digit mobile number" maxlength="14" pattern="(\+91[\s-]?)?[6-9]\d{9}" title="Enter a valid 10-digit mobile number" required>
+      <span class="field-error" data-error-for="phone"></span>
+    </div>
+
+    <div class="field">
+      <label>Service</label>
+      <select name="service" id="serviceSelect" required>
+        <option value="">Select a service</option>
+        <option data-key="price_poster" data-price="99">Poster — ₹99</option>
+        <option data-key="price_thumbnail" data-price="149">YouTube thumbnail — ₹149</option>
+        <option data-key="price_packaging" data-price="299">Packaging design — ₹299</option>
+        <option data-key="price_book" data-price="599">Book design, layout &amp; work — ₹599</option>
+      </select>
+      <span class="field-error" data-error-for="service"></span>
+    </div>
+
+    <div class="price-preview" id="pricePreview" style="display:none;">
+      <span>Estimated price</span>
+      <span class="amt" id="priceAmt">₹0</span>
+    </div>
+
+    <div class="field">
+      <label>Coupon code <span style="text-transform:none; font-weight:500;">(optional)</span></label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" name="coupon_code" id="couponInput" placeholder="e.g. FIRST20" style="text-transform:uppercase;">
+        <button type="button" class="btn" id="applyCouponBtn" style="width:auto; padding:11px 18px; white-space:nowrap;">Apply</button>
+      </div>
+      <span class="field-error" id="couponError"></span>
+      <div id="couponSuccess" style="display:none; color:var(--ledger-green); font-size:.8rem; font-weight:700; margin-top:6px; font-family:var(--mono);"></div>
+    </div>
+
+    <div class="price-preview" id="discountPreview" style="display:none; border-color:var(--ledger-green);">
+      <span>Price after discount</span>
+      <span class="amt" id="discountedAmt" style="color:var(--ledger-green);">₹0</span>
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label>Size / platform</label>
+        <input type="text" name="size" placeholder="e.g. A4, Instagram post, 1280×720" required>
+        <span class="field-error" data-error-for="size"></span>
+      </div>
+      <div class="field">
+        <label>Deadline needed by</label>
+        <input type="date" name="deadline" required>
+        <span class="field-error" data-error-for="deadline"></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Text content &amp; details</label>
+      <textarea name="details" rows="4" placeholder="Exact text, names, numbers, and any style notes." required></textarea>
+      <span class="field-error" data-error-for="details"></span>
+    </div>
+
+    <div class="field">
+      <label>Reference design <span style="text-transform:none; font-weight:500;">(optional)</span></label>
+      <input type="file" name="reference" accept="image/*,.pdf">
+      <p class="form-note" style="margin-top:6px;">Attach a sample, sketch, or reference file here.</p>
+    </div>
+
+    <label class="agree-row">
+      <input type="checkbox" id="agreeBox" required>
+      <span>I have read and agree to the <a href="about.html#refund" target="_blank">Refund Policy &amp; Terms</a>.</span>
+    </label>
+
+    <div class="submit-row">
+      <button type="submit" class="btn" id="submitBtn">Submit order →</button>
+    </div>
+    <p class="form-note" id="formErrorNote" style="display:none; color:var(--carbon-red);">Something went wrong saving your order. Please try again or message on WhatsApp.</p>
+    <p class="form-note">Your order will be saved and you'll get an Order ID for tracking.</p>
+  </form>
+
+  <div class="success-card" id="successCard" style="display:none;">
+    <div class="success-icon">✓</div>
+    <h2>Order received!</h2>
+    <p>Save this Order ID — you'll need it to track your order.</p>
+    <div class="order-id-box" id="orderIdBox">GD-XXXXXX</div>
+    <div id="couponConfirm" style="display:none; color:var(--ledger-green); font-size:.85rem; font-weight:700; margin-top:10px; font-family:var(--mono);"></div>
+    <a href="#" id="proceedToPaymentBtn" class="btn" style="margin-top:18px; background:var(--ledger-green);">Proceed to payment →</a>
+    <a href="index.html" class="btn" style="margin-top:10px; background:transparent; border:1px solid var(--ink); color:var(--ink);">← Back to home</a>
+  </div>
+</div>
+
+
+<footer>
+  <p>Gaurav Design · Burari, Delhi NCR</p>
+  <p><a href="index.html">← Back to home</a></p>
+</footer>
+
+<script>
+  const toggle = document.getElementById('themeToggle');
+  const body = document.body;
+  try {
+    const saved = localStorage.getItem('gd-theme');
+    if(saved){ body.setAttribute('data-theme', saved); toggle.textContent = saved === 'dark' ? '☀️' : '🌙'; }
+  } catch(e){}
+  toggle.addEventListener('click', () => {
+    const isDark = body.getAttribute('data-theme') === 'dark';
+    const next = isDark ? 'light' : 'dark';
+    body.setAttribute('data-theme', next);
+    toggle.textContent = isDark ? '🌙' : '☀️';
+    try { localStorage.setItem('gd-theme', next); } catch(e){}
+  });
+
+  // Live price preview as the client picks a service
+  const serviceSelect = document.getElementById('serviceSelect');
+
+  // Pull live prices from the database so this always matches the Home page.
+  // Falls back to the hardcoded defaults in the HTML if the request fails.
+  (async function loadLivePrices(){
+    try {
+      const res = await fetch('/api/site-settings');
+      if (!res.ok) return;
+      const data = await res.json();
+      const s = data.settings;
+      if (!s) return;
+      Array.from(serviceSelect.options).forEach(opt => {
+        const key = opt.getAttribute('data-key');
+        if (key && s[key] != null) {
+          const price = Number(s[key]);
+          opt.setAttribute('data-price', price);
+          const label = opt.textContent.split('—')[0].trim();
+          opt.textContent = `${label} — ₹${price.toLocaleString('en-IN')}`;
+        }
+      });
+    } catch (e) {
+      // Keep the static defaults already in the HTML
+    }
+  })();
+  const pricePreview = document.getElementById('pricePreview');
+  const priceAmt = document.getElementById('priceAmt');
+  const discountPreview = document.getElementById('discountPreview');
+  const discountedAmt = document.getElementById('discountedAmt');
+  const couponInput = document.getElementById('couponInput');
+  const applyCouponBtn = document.getElementById('applyCouponBtn');
+  const couponError = document.getElementById('couponError');
+  const couponSuccess = document.getElementById('couponSuccess');
+
+  let appliedDiscountPercent = null;
+
+  function updateDiscountedPrice(){
+    const opt = serviceSelect.selectedOptions[0];
+    const price = opt ? Number(opt.getAttribute('data-price')) : null;
+    if (price && appliedDiscountPercent) {
+      const finalPrice = Math.round(price * (1 - appliedDiscountPercent / 100));
+      discountedAmt.textContent = '₹' + finalPrice.toLocaleString('en-IN');
+      discountPreview.style.display = 'flex';
+    } else {
+      discountPreview.style.display = 'none';
+    }
+  }
+
+  serviceSelect.addEventListener('change', () => {
+    const opt = serviceSelect.selectedOptions[0];
+    const price = opt ? opt.getAttribute('data-price') : null;
+    if(price){
+      priceAmt.textContent = '₹' + price;
+      pricePreview.style.display = 'flex';
+    } else {
+      pricePreview.style.display = 'none';
+    }
+    updateDiscountedPrice();
+  });
+
+  applyCouponBtn.addEventListener('click', async () => {
+    const code = couponInput.value.trim();
+    couponError.style.display = 'none';
+    couponError.textContent = '';
+    couponSuccess.style.display = 'none';
+
+    if (!code) {
+      couponError.textContent = 'Enter a coupon code first.';
+      couponError.style.display = 'block';
+      return;
+    }
+    if (!serviceSelect.value) {
+      couponError.textContent = 'Select a service first, then apply your coupon.';
+      couponError.style.display = 'block';
+      return;
+    }
+
+    applyCouponBtn.disabled = true;
+    applyCouponBtn.textContent = 'Checking…';
+
+    try {
+      const res = await fetch('/api/validate-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        appliedDiscountPercent = null;
+        updateDiscountedPrice();
+        couponError.textContent = data.error || 'Invalid coupon code.';
+        couponError.style.display = 'block';
+        return;
+      }
+
+      appliedDiscountPercent = data.discountPercent;
+      couponInput.value = data.code;
+      couponSuccess.textContent = `Coupon applied: ${data.code} (${data.discountPercent}% off)`;
+      couponSuccess.style.display = 'block';
+      updateDiscountedPrice();
+
+    } catch (err) {
+      couponError.textContent = 'Could not check this coupon. Please try again.';
+      couponError.style.display = 'block';
+    } finally {
+      applyCouponBtn.disabled = false;
+      applyCouponBtn.textContent = 'Apply';
+    }
+  });
+
+  // Form validation + secure backend submission
+  const orderForm = document.querySelector('form[name="order"]');
+  const submitBtn = document.getElementById('submitBtn');
+
+  function setError(fieldName, message){
+    const input = orderForm.elements[fieldName];
+    const wrapper = input.closest('.field');
+    const errorEl = wrapper.querySelector('.field-error');
+    if(message){ wrapper.classList.add('invalid'); errorEl.textContent = message; }
+    else { wrapper.classList.remove('invalid'); errorEl.textContent = ''; }
+  }
+
+  function validateForm(){
+    let valid = true;
+    const name = orderForm.name.value.trim();
+    const email = orderForm.email.value.trim();
+    const phone = orderForm.phone.value.trim();
+    const service = orderForm.service.value;
+    const size = orderForm.size.value.trim();
+    const deadline = orderForm.deadline.value;
+    const details = orderForm.details.value.trim();
+
+    if(!name){ setError('name','Name is required'); valid = false; } else setError('name','');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setError('email','Enter a valid email address'); valid = false; } else setError('email','');
+    if(!/^[6-9]\d{9}$/.test(phone.replace(/^\+91[\s-]?/, ''))){ setError('phone','Enter a valid 10-digit mobile number'); valid = false; } else setError('phone','');
+    if(!service){ setError('service','Please select a service'); valid = false; } else setError('service','');
+    if(!size){ setError('size','Size or platform is required'); valid = false; } else setError('size','');
+    if(!deadline){ setError('deadline','Please choose a deadline'); valid = false; } else setError('deadline','');
+    if(!details){ setError('details','Please add text content and details'); valid = false; } else setError('details','');
+
+    if(!document.getElementById('agreeBox').checked){ valid = false; document.getElementById('agreeBox').focus(); }
+
+    return valid;
+  }
+
+  ['name','email','phone','service','size','deadline','details'].forEach(f => {
+    orderForm.elements[f].addEventListener('input', () => setError(f, ''));
+    orderForm.elements[f].addEventListener('change', () => setError(f, ''));
+  });
+
+  orderForm.addEventListener('submit', async function(e){
+    e.preventDefault();
+    if(!validateForm()){ return; }
+    if(submitBtn.disabled){ return; }
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+    document.getElementById('formErrorNote').style.display = 'none';
+
+    try {
+      const formData = new FormData(orderForm);
+      const res = await fetch('/api/submit-order', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Could not save order');
+      }
+
+      // Show success with the real, server-generated Order ID
+      document.getElementById('orderIdBox').textContent = data.orderNumber;
+      if (data.appliedCouponCode && data.appliedDiscountPercent) {
+        const confirmEl = document.getElementById('couponConfirm');
+        confirmEl.textContent = `Coupon ${data.appliedCouponCode} applied — ${data.appliedDiscountPercent}% off`;
+        confirmEl.style.display = 'block';
+      }
+      document.getElementById('proceedToPaymentBtn').href = 'payment.html?order=' + encodeURIComponent(data.orderNumber);
+      orderForm.style.display = 'none';
+      document.getElementById('successCard').style.display = 'block';
+
+    } catch (err) {
+      console.error('Order save failed:', err);
+      document.getElementById('formErrorNote').style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit order →';
+    }
+  });
+</script>
+</body>
+</html>

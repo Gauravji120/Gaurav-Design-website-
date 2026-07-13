@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>document.documentElement.classList.add('js');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login — Gaurav Design</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFEDE2; --paper-alt:#E6E2D3; --ink:#1F2A38; --ink-soft:#4A5563;
+    --carbon-red:#B23A2E; --stamp-mustard:#C9922A; --ledger-green:#4C6B54;
+    --line:#C9C4B2; --white:#FFFDF8; --mono:'JetBrains Mono', monospace; --sans:'Work Sans', sans-serif;
+  }
+  [data-theme="dark"]{
+    --paper:#171A1E; --paper-alt:#1E2228; --ink:#ECE8DC; --ink-soft:#A9A79B;
+    --carbon-red:#E0574A; --stamp-mustard:#E0AC4D; --ledger-green:#7FA98C;
+    --line:#3A3E44; --white:#20242A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--paper); color:var(--ink); font-family:var(--sans);
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  a{color:inherit; text-decoration:none;}
+  .mono{font-family:var(--mono);}
+
+  .login-wrap{max-width:380px; width:100%;}
+  .brand-row{text-align:center; margin-bottom:22px;}
+  .brand-row .brand{font-weight:700; font-size:1rem;}
+  .brand-row .tag{font-family:var(--mono); font-size:.68rem; color:var(--carbon-red); letter-spacing:.1em; margin-top:4px;}
+
+  .login-card{background:var(--white); border:1px solid var(--line); padding:30px;}
+  .login-card h1{font-size:1.15rem; font-weight:700; margin-bottom:20px; text-align:center;}
+
+  .field{margin-bottom:16px;}
+  label{display:block; font-size:.76rem; font-weight:700; margin-bottom:6px; font-family:var(--mono); color:var(--ink-soft);}
+  .pw-wrap{position:relative;}
+  input{width:100%; padding:11px 12px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:.92rem; border-radius:2px;}
+  input:focus{outline:2px solid var(--carbon-red); outline-offset:1px;}
+  .pw-toggle{
+    position:absolute; right:10px; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer; font-size:.9rem; color:var(--ink-soft);
+  }
+
+  .btn{width:100%; padding:13px; border-radius:2px; font-weight:700; font-size:.9rem; border:none; cursor:pointer; background:var(--carbon-red); color:#fff; margin-top:6px; transition:transform .15s;}
+  .btn:hover{transform:translateY(-2px);}
+  .btn:disabled{opacity:.6; cursor:not-allowed; transform:none;}
+
+  .login-error{display:none; background:var(--paper-alt); border:1px solid var(--carbon-red); border-left:4px solid var(--carbon-red); padding:10px 14px; font-size:.82rem; margin-top:14px;}
+
+  .back-row{text-align:center; margin-top:18px;}
+  .back-row a{font-family:var(--mono); font-size:.78rem; color:var(--ink-soft);}
+  .back-row a:hover{color:var(--carbon-red);}
+</style>
+</head>
+<body data-theme="light">
+
+<div class="login-wrap">
+  <div class="brand-row">
+    <div class="brand">GAURAV DESIGN</div>
+    <div class="tag">ADMIN ACCESS ONLY</div>
+  </div>
+
+  <div class="login-card">
+    <h1>Admin Login</h1>
+    <form id="loginForm">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" name="username" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" name="password" id="pwInput" autocomplete="current-password" required>
+          <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">👁</button>
+        </div>
+      </div>
+      <button type="submit" class="btn" id="loginBtn">Log in</button>
+      <div class="login-error" id="loginError"></div>
+    </form>
+  </div>
+
+  <div class="back-row">
+    <a href="index.html">← Back to home</a>
+  </div>
+</div>
+
+<script>
+  const pwInput = document.getElementById('pwInput');
+  const pwToggle = document.getElementById('pwToggle');
+  pwToggle.addEventListener('click', () => {
+    pwInput.type = pwInput.type === 'password' ? 'text' : 'password';
+    pwToggle.textContent = pwInput.type === 'password' ? '👁' : '🙈';
+  });
+
+  const loginForm = document.getElementById('loginForm');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginError = document.getElementById('loginError');
+
+  loginForm.addEventListener('submit', async function(e){
+    e.preventDefault();
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Checking…';
+    loginError.style.display = 'none';
+
+    const username = loginForm.username.value.trim();
+    const password = loginForm.password.value;
+
+    try {
+      const res = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        loginError.textContent = data.error || 'Incorrect username or password.';
+        loginError.style.display = 'block';
+        return;
+      }
+
+      // Store the session token for the Admin Dashboard to use
+      try {
+        localStorage.setItem('gd_admin_token', data.token);
+        localStorage.setItem('gd_admin_token_exp', String(data.expiresAt));
+      } catch(e) {}
+
+      loginBtn.textContent = 'Success — redirecting…';
+      window.location.href = 'admin.html';
+
+    } catch (err) {
+      console.error('Login failed:', err);
+      loginError.textContent = 'Something went wrong. Please try again.';
+      loginError.style.display = 'block';
+    } finally {
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Log in';
+    }
+  });
+</script>
+</body>
+</html>
