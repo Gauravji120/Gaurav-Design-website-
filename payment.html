@@ -101,6 +101,7 @@
 
 <div class="wrap">
   <div class="order-chip" id="orderChip"></div>
+  <div class="order-chip" id="amountToPayBox" style="display:none; background:var(--ledger-green); color:#fff; font-size:1.15rem; margin-top:-14px; margin-bottom:20px;"></div>
 
   <div class="pay-card">
     <div class="qr-frame">
@@ -190,6 +191,20 @@ const SAMPLE_QR_IMG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA
     const chip = document.getElementById('orderChip');
     chip.textContent = `Paying for Order ${orderId}`;
     chip.style.display = 'block';
+
+    (async function loadOrderTotal(){
+      try {
+        const res = await fetch('/api/order-total?order=' + encodeURIComponent(orderId));
+        const data = await res.json();
+        if (res.ok && data.success && data.order.total_price != null) {
+          const amtBox = document.getElementById('amountToPayBox');
+          amtBox.textContent = `Amount to pay: ₹${Number(data.order.total_price).toLocaleString('en-IN')}`;
+          amtBox.style.display = 'block';
+        }
+      } catch (e) {
+        // Silently skip — QR/UPI still work without the amount shown
+      }
+    })();
   }
 
   const copyBtn = document.getElementById('copyBtn');
