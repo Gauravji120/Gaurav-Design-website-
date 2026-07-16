@@ -132,8 +132,16 @@
       <span class="field-error" data-error-for="service"></span>
     </div>
 
+    <div class="field">
+      <label>Quantity</label>
+      <select name="quantity" id="quantitySelect">
+        <!-- populated by JS: 1 to 20 -->
+      </select>
+    </div>
+    <input type="hidden" name="service_key" id="serviceKeyField">
+
     <div class="price-preview" id="pricePreview" style="display:none;">
-      <span>Estimated price</span>
+      <span id="pricePreviewLabel">Estimated price</span>
       <span class="amt" id="priceAmt">₹0</span>
     </div>
 
@@ -195,6 +203,7 @@
     <p>Save this Order ID — you'll need it to track your order.</p>
     <div class="order-id-box" id="orderIdBox">GD-XXXXXX</div>
     <div id="couponConfirm" style="display:none; color:var(--ledger-green); font-size:.85rem; font-weight:700; margin-top:10px; font-family:var(--mono);"></div>
+    <div id="totalAmountBox" style="display:none; font-family:var(--mono); font-weight:700; font-size:1.1rem; margin-top:12px;"></div>
     <a href="#" id="proceedToPaymentBtn" class="btn" style="margin-top:18px; background:var(--ledger-green);">Proceed to payment →</a>
     <a href="index.html" class="btn" style="margin-top:10px; background:transparent; border:1px solid var(--ink); color:var(--ink);">← Back to home</a>
   </div>
@@ -247,6 +256,7 @@
     }
   })();
   const pricePreview = document.getElementById('pricePreview');
+  const pricePreviewLabel = document.getElementById('pricePreviewLabel');
   const priceAmt = document.getElementById('priceAmt');
   const discountPreview = document.getElementById('discountPreview');
   const discountedAmt = document.getElementById('discountedAmt');
@@ -254,14 +264,45 @@
   const applyCouponBtn = document.getElementById('applyCouponBtn');
   const couponError = document.getElementById('couponError');
   const couponSuccess = document.getElementById('couponSuccess');
+  const quantitySelect = document.getElementById('quantitySelect');
+
+  // Populate quantity dropdown 1–20
+  for (let i = 1; i <= 20; i++) {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = i;
+    quantitySelect.appendChild(opt);
+  }
 
   let appliedDiscountPercent = null;
 
-  function updateDiscountedPrice(){
+  function currentUnitPrice(){
     const opt = serviceSelect.selectedOptions[0];
-    const price = opt ? Number(opt.getAttribute('data-price')) : null;
-    if (price && appliedDiscountPercent) {
-      const finalPrice = Math.round(price * (1 - appliedDiscountPercent / 100));
+    return opt ? Number(opt.getAttribute('data-price')) : null;
+  }
+
+  function updatePricePreview(){
+    const opt = serviceSelect.selectedOptions[0];
+    document.getElementById('serviceKeyField').value = opt ? (opt.getAttribute('data-key') || '') : '';
+    const unitPrice = currentUnitPrice();
+    const qty = Number(quantitySelect.value) || 1;
+    if (unitPrice) {
+      const subtotal = unitPrice * qty;
+      pricePreviewLabel.textContent = qty > 1 ? `Estimated price (${qty} × ₹${unitPrice})` : 'Estimated price';
+      priceAmt.textContent = '₹' + subtotal.toLocaleString('en-IN');
+      pricePreview.style.display = 'flex';
+    } else {
+      pricePreview.style.display = 'none';
+    }
+    updateDiscountedPrice();
+  }
+
+  function updateDiscountedPrice(){
+    const unitPrice = currentUnitPrice();
+    const qty = Number(quantitySelect.value) || 1;
+    if (unitPrice && appliedDiscountPercent) {
+      const subtotal = unitPrice * qty;
+      const finalPrice = Math.round(subtotal * (1 - appliedDiscountPercent / 100));
       discountedAmt.textContent = '₹' + finalPrice.toLocaleString('en-IN');
       discountPreview.style.display = 'flex';
     } else {
@@ -269,17 +310,9 @@
     }
   }
 
-  serviceSelect.addEventListener('change', () => {
-    const opt = serviceSelect.selectedOptions[0];
-    const price = opt ? opt.getAttribute('data-price') : null;
-    if(price){
-      priceAmt.textContent = '₹' + price;
-      pricePreview.style.display = 'flex';
-    } else {
-      pricePreview.style.display = 'none';
-    }
-    updateDiscountedPrice();
-  });
+  serviceSelect.addEventListener('change', updatePricePreview);
+  quantitySelect.addEventListener('change', updatePricePreview);
+
 
   applyCouponBtn.addEventListener('click', async () => {
     const code = couponInput.value.trim();
@@ -398,6 +431,11 @@
         const confirmEl = document.getElementById('couponConfirm');
         confirmEl.textContent = `Coupon ${data.appliedCouponCode} applied — ${data.appliedDiscountPercent}% off`;
         confirmEl.style.display = 'block';
+      }
+      if (data.totalPrice != null) {
+        const totalEl = document.getElementById('totalAmountBox');
+        totalEl.textContent = `Total to pay: ₹${Number(data.totalPrice).toLocaleString('en-IN')}`;
+        totalEl.style.display = 'block';
       }
       document.getElementById('proceedToPaymentBtn').href = 'payment.html?order=' + encodeURIComponent(data.orderNumber);
       orderForm.style.display = 'none';
