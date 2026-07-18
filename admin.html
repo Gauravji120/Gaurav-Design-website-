@@ -194,8 +194,6 @@
     <div class="card">
       <h3 style="font-size:.95rem; margin-bottom:14px;">Social Links</h3>
       <div class="form-grid">
-        <div class="field"><label>Instagram URL</label><input type="text" id="instagramurl" style="width:100%;"></div>
-        <div class="field"><label>Pinterest URL</label><input type="text" id="pinteresturl" style="width:100%;"></div>
         <div class="field"><label>WhatsApp number (with country code, no +)</label><input type="text" id="whatsappnumber" placeholder="918368125261" style="width:100%;"></div>
       </div>
       <div class="field">
@@ -203,9 +201,35 @@
         <input type="file" id="igQrFile" accept="image/*">
         <button class="btn btn-sm" id="uploadIgQrBtn" style="margin-top:8px;">Upload QR</button>
       </div>
-      <button class="btn btn-green" id="saveSocialBtn" style="margin-top:10px;">Save social links</button>
+      <button class="btn btn-green" id="saveSocialBtn" style="margin-top:10px;">Save WhatsApp number</button>
       <div class="save-note" id="socialSaveNote">✓ Saved — changes are live now.</div>
       <div class="error-msg" id="paymentError"></div>
+
+      <hr style="margin:20px 0; border:none; border-top:1px solid var(--line);">
+
+      <h3 style="font-size:.95rem; margin-bottom:14px;">Add unlimited social links</h3>
+      <div class="form-grid">
+        <div class="field">
+          <label>Platform</label>
+          <select id="newSocialPlatform" style="width:100%;">
+            <option value="instagram">Instagram</option>
+            <option value="youtube">YouTube</option>
+            <option value="facebook">Facebook</option>
+            <option value="twitter">Twitter / X</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="pinterest">Pinterest</option>
+            <option value="snapchat">Snapchat</option>
+            <option value="telegram">Telegram</option>
+            <option value="tiktok">TikTok</option>
+            <option value="threads">Threads</option>
+          </select>
+        </div>
+        <div class="field"><label>Profile URL</label><input type="text" id="newSocialUrl" placeholder="https://..." style="width:100%;"></div>
+      </div>
+      <button class="btn btn-green" id="addSocialLinkBtn">+ Add social link</button>
+      <div class="error-msg" id="socialLinkError"></div>
+
+      <div id="socialLinksList" style="margin-top:16px; display:flex; flex-direction:column; gap:8px;"></div>
     </div>
   </div>
 
@@ -269,7 +293,7 @@
       if (btn.dataset.tab === 'orders') loadOrders();
       if (btn.dataset.tab === 'pricing') loadSettings();
       if (btn.dataset.tab === 'coupons') loadCoupons();
-      if (btn.dataset.tab === 'payment') loadSettings();
+      if (btn.dataset.tab === 'payment') { loadSettings(); loadSocialLinks(); }
       if (btn.dataset.tab === 'overview') loadOverview();
     });
   });
@@ -445,8 +469,6 @@
       document.getElementById('offertext').value = s.offer_text ?? '';
       document.getElementById('offeractive').checked = !!s.offer_active;
       document.getElementById('upiid').value = s.upi_id ?? '';
-      document.getElementById('instagramurl').value = s.instagram_url ?? '';
-      document.getElementById('pinteresturl').value = s.pinterest_url ?? '';
       document.getElementById('whatsappnumber').value = s.whatsapp_number ?? '';
       settingsLoaded = true;
     } catch(e) {}
@@ -490,8 +512,6 @@
         headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           upi_id: document.getElementById('upiid').value.trim(),
-          instagram_url: document.getElementById('instagramurl').value.trim(),
-          pinterest_url: document.getElementById('pinteresturl').value.trim(),
           whatsapp_number: document.getElementById('whatsappnumber').value.trim()
         })
       });
@@ -499,7 +519,69 @@
       if (res.ok && data.success) { note.style.display = 'block'; }
       else { err.textContent = data.error || 'Could not save'; err.style.display = 'block'; }
     } catch(e) {}
-    btn.disabled = false; btn.textContent = 'Save social links';
+    btn.disabled = false; btn.textContent = 'Save WhatsApp number';
+  });
+
+  // ===== Unlimited social links =====
+  async function loadSocialLinks(){
+    try {
+      const res = await apiFetch('/api/admin-social-links', { headers: authHeaders() });
+      const data = await res.json();
+      if (!res.ok || !data.success) return;
+      renderSocialLinksList(data.links || []);
+    } catch(e) {}
+  }
+
+  function renderSocialLinksList(links){
+    const container = document.getElementById('socialLinksList');
+    if (!links.length) {
+      container.innerHTML = '<p style="color:var(--ink-soft); font-size:.82rem;">No social links added yet.</p>';
+      return;
+    }
+    container.innerHTML = links.map(link => {
+      const label = link.platform.charAt(0).toUpperCase() + link.platform.slice(1);
+      return `<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 12px; border:1px solid var(--line); border-radius:4px; background:var(--paper);">
+        <span style="font-size:.85rem;"><strong>${label}</strong> — <a href="${link.url}" target="_blank" style="color:var(--carbon-red);">${link.url}</a></span>
+        <button class="btn btn-sm" data-delete-id="${link.id}" style="background:var(--carbon-red);">Remove</button>
+      </div>`;
+    }).join('');
+    container.querySelectorAll('[data-delete-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true; btn.textContent = 'Removing…';
+        try {
+          await apiFetch('/api/admin-social-links?id=' + encodeURIComponent(btn.dataset.deleteId), {
+            method: 'DELETE',
+            headers: authHeaders()
+          });
+          loadSocialLinks();
+        } catch(e) { btn.disabled = false; btn.textContent = 'Remove'; }
+      });
+    });
+  }
+
+  document.getElementById('addSocialLinkBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('addSocialLinkBtn');
+    const err = document.getElementById('socialLinkError');
+    err.style.display = 'none';
+    const platform = document.getElementById('newSocialPlatform').value;
+    const url = document.getElementById('newSocialUrl').value.trim();
+    if (!url) { err.textContent = 'Enter a URL first.'; err.style.display = 'block'; return; }
+    btn.disabled = true; btn.textContent = 'Adding…';
+    try {
+      const res = await apiFetch('/api/admin-social-links', {
+        method: 'POST',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ platform, url })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        document.getElementById('newSocialUrl').value = '';
+        loadSocialLinks();
+      } else {
+        err.textContent = data.error || 'Could not add link'; err.style.display = 'block';
+      }
+    } catch(e) {}
+    btn.disabled = false; btn.textContent = '+ Add social link';
   });
 
   async function uploadQr(inputId, target, btnEl){
