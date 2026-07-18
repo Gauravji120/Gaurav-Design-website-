@@ -16,18 +16,24 @@ export default async (req: Request, context: Context) => {
   }
 
   try {
-    const res = await fetch(
+    const settingsRes = await fetch(
       `${SUPABASE_URL}/rest/v1/site_settings?id=eq.1&select=price_poster,price_thumbnail,price_packaging,price_book,offer_text,offer_active,upi_id,upi_qr_url,instagram_url,instagram_qr_url,pinterest_url,whatsapp_number`,
       { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
     );
 
-    if (!res.ok) {
+    if (!settingsRes.ok) {
       return new Response(JSON.stringify({ error: "Could not load settings" }), { status: 500 });
     }
 
-    const [settings] = await res.json();
+    const [settings] = await settingsRes.json();
 
-    return new Response(JSON.stringify({ success: true, settings }), {
+    const socialRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/social_links?select=platform,url&order=display_order.asc`,
+      { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+    );
+    const socialLinks = socialRes.ok ? await socialRes.json() : [];
+
+    return new Response(JSON.stringify({ success: true, settings, socialLinks }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
