@@ -64,9 +64,8 @@
   .section-head h2{font-size:1.5rem; font-weight:700;}
   .section-head p{color:var(--ink-soft); margin-top:8px; font-size:.94rem;}
 
-  .price-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
-  @media(max-width:860px){.price-grid{grid-template-columns:repeat(2,1fr);}}
-  @media(max-width:520px){.price-grid{grid-template-columns:1fr;}}
+  .price-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:16px;}
+  @media(max-width:520px){.price-grid{grid-template-columns:1fr 1fr;}}
   .price-card{background:var(--white); border:1px solid var(--line); padding:22px 18px; text-align:center;}
   .price-card h3{font-size:.92rem; font-weight:700; margin-bottom:10px; min-height:2.4em;}
   .price-card .amt{font-family:var(--mono); font-size:1.5rem; font-weight:700; color:var(--carbon-red);}
@@ -124,7 +123,6 @@
   <a href="track-order.html">Track your order</a>
   <a href="about.html#refund">Refund &amp; terms</a>
   <a href="order.html">Place an order</a>
-  <div id="menuSocialLinks"><!-- populated dynamically --></div>
   <div class="menu-qr">
     <img id="menuQrImg" src="" alt="Scan to open Instagram @gauravdesign14">
     <span>Scan to follow on Instagram</span>
@@ -151,11 +149,8 @@
     <h2>Simple, fixed pricing</h2>
     <p>One price per category. No hidden charges.</p>
   </div>
-  <div class="price-grid">
-    <div class="price-card reveal"><h3>Poster</h3><div class="amt" id="priceAmtPoster">₹99</div></div>
-    <div class="price-card reveal"><h3>YouTube thumbnail</h3><div class="amt" id="priceAmtThumbnail">₹149</div></div>
-    <div class="price-card reveal"><h3>Packaging design</h3><div class="amt" id="priceAmtPackaging">₹299</div></div>
-    <div class="price-card reveal"><h3>Book design, layout &amp; work</h3><div class="amt" id="priceAmtBook">₹599</div></div>
+  <div class="price-grid" id="priceGrid">
+    <!-- populated dynamically from the services table -->
   </div>
 </section>
 
@@ -230,18 +225,13 @@ const DATA_igQR = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAg
       const s = data.settings;
       if (!s) return;
 
-      const priceMap = {
-        priceAmtPoster: s.price_poster,
-        priceAmtThumbnail: s.price_thumbnail,
-        priceAmtPackaging: s.price_packaging,
-        priceAmtBook: s.price_book
-      };
-      Object.entries(priceMap).forEach(([id, price]) => {
-        if (price != null) {
-          const el = document.getElementById(id);
-          if (el) el.textContent = '₹' + Number(price).toLocaleString('en-IN');
-        }
-      });
+      const services = data.services || [];
+      const priceGrid = document.getElementById('priceGrid');
+      if (priceGrid && services.length) {
+        priceGrid.innerHTML = services.map(svc =>
+          `<div class="price-card reveal"><h3>${svc.name}</h3><div class="amt">₹${Number(svc.price).toLocaleString('en-IN')}</div></div>`
+        ).join('');
+      }
 
       if (s.offer_active && s.offer_text) {
         document.getElementById('offerBannerText').textContent = s.offer_text;
@@ -277,13 +267,6 @@ const DATA_igQR = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAg
           const icon = ICONS[link.platform] || '';
           const label = link.platform.charAt(0).toUpperCase() + link.platform.slice(1);
           return `<a class="ig-icon-link" href="${link.url}" target="_blank" rel="noopener" aria-label="Gaurav Design on ${label}">${icon}<span>${label}</span></a>`;
-        }).join('');
-      }
-      const menuSocial = document.getElementById('menuSocialLinks');
-      if (menuSocial && socialLinks.length) {
-        menuSocial.innerHTML = socialLinks.map(link => {
-          const label = link.platform.charAt(0).toUpperCase() + link.platform.slice(1);
-          return `<a href="${link.url}" target="_blank" rel="noopener">${label} — Follow</a>`;
         }).join('');
       }
     } catch (e) {
