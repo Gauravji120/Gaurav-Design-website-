@@ -124,10 +124,10 @@
       <label>Service</label>
       <select name="service" id="serviceSelect" required>
         <option value="">Select a service</option>
-        <option data-key="price_poster" data-price="99">Poster — ₹99</option>
-        <option data-key="price_thumbnail" data-price="149">YouTube thumbnail — ₹149</option>
-        <option data-key="price_packaging" data-price="299">Packaging design — ₹299</option>
-        <option data-key="price_book" data-price="599">Book design, layout &amp; work — ₹599</option>
+        <option data-key="poster" data-price="99">Poster — ₹99</option>
+        <option data-key="thumbnail" data-price="149">YouTube thumbnail — ₹149</option>
+        <option data-key="packaging" data-price="299">Packaging design — ₹299</option>
+        <option data-key="book" data-price="599">Book design, layout &amp; work — ₹599</option>
       </select>
       <span class="field-error" data-error-for="service"></span>
     </div>
@@ -233,26 +233,22 @@
   // Live price preview as the client picks a service
   const serviceSelect = document.getElementById('serviceSelect');
 
-  // Pull live prices from the database so this always matches the Home page.
-  // Falls back to the hardcoded defaults in the HTML if the request fails.
-  (async function loadLivePrices(){
+  // Build the service list dynamically from the database so any service the
+  // admin adds automatically shows up here — no code changes needed.
+  (async function loadLiveServices(){
     try {
       const res = await fetch('/api/site-settings');
       if (!res.ok) return;
       const data = await res.json();
-      const s = data.settings;
-      if (!s) return;
-      Array.from(serviceSelect.options).forEach(opt => {
-        const key = opt.getAttribute('data-key');
-        if (key && s[key] != null) {
-          const price = Number(s[key]);
-          opt.setAttribute('data-price', price);
-          const label = opt.textContent.split('—')[0].trim();
-          opt.textContent = `${label} — ₹${price.toLocaleString('en-IN')}`;
-        }
-      });
+      const services = data.services || [];
+      if (!services.length) return;
+
+      serviceSelect.innerHTML = '<option value="">Select a service</option>' +
+        services.map(svc =>
+          `<option data-key="${svc.service_key}" data-price="${svc.price}">${svc.name} — ₹${Number(svc.price).toLocaleString('en-IN')}</option>`
+        ).join('');
     } catch (e) {
-      // Keep the static defaults already in the HTML
+      // Keep the static fallback options already in the HTML
     }
   })();
   const pricePreview = document.getElementById('pricePreview');
