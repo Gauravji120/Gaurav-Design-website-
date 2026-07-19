@@ -1,7 +1,7 @@
 import type { Context, Config } from "@netlify/functions";
 
 const OWNER_EMAIL = "gauravadhikari9289@gmail.com";
-const FROM_EMAIL = "Gaurav Design <onboarding@resend.dev>";
+const FROM_EMAIL = "Going Beyond <onboarding@resend.dev>";
 
 function isValidPhone(phone: string): boolean {
   const cleaned = phone.trim().replace(/^\+91[\s-]?/, "");
@@ -248,7 +248,7 @@ export default async (req: Request, context: Context) => {
         <strong>Total:</strong> ₹${totalPrice}<br>
         <strong>Deadline:</strong> ${deadline}</p>
         <p>I'll review your order and confirm it shortly. You can track its status anytime using your Order ID on the Track Order page.</p>
-        <p>— Gaurav Design</p>
+        <p>— Going Beyond</p>
       `;
       const ownerHtml = `
         <p>New order received.</p>
@@ -268,7 +268,7 @@ export default async (req: Request, context: Context) => {
       const clientSent = await sendEmail(
         RESEND_KEY,
         email,
-        `Your order ${orderNumber} has been received — Gaurav Design`,
+        `Your order ${orderNumber} has been received — Going Beyond`,
         clientHtml
       );
       await logEmail(SUPABASE_URL, SERVICE_KEY, orderId, "Order Received", email, clientSent ? "Success" : "Failed");
