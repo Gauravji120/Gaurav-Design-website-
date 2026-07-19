@@ -103,15 +103,14 @@ export default async (req: Request, context: Context) => {
 
     // Look up the CURRENT live price ourselves — never trust a price the browser sends.
     let unitPrice: number | null = null;
-    const validServiceKeys = ["price_poster", "price_thumbnail", "price_packaging", "price_book"];
-    if (validServiceKeys.includes(serviceKey)) {
-      const settingsRes = await fetch(
-        `${SUPABASE_URL}/rest/v1/site_settings?id=eq.1&select=${serviceKey}`,
+    if (serviceKey) {
+      const svcRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/services?service_key=eq.${encodeURIComponent(serviceKey)}&active=eq.true&select=price`,
         { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
       );
-      if (settingsRes.ok) {
-        const [row] = await settingsRes.json();
-        unitPrice = row ? Number(row[serviceKey]) : null;
+      if (svcRes.ok) {
+        const [row] = await svcRes.json();
+        unitPrice = row ? Number(row.price) : null;
       }
     }
 
