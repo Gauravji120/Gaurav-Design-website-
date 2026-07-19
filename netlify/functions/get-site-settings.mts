@@ -33,7 +33,13 @@ export default async (req: Request, context: Context) => {
     );
     const socialLinks = socialRes.ok ? await socialRes.json() : [];
 
-    return new Response(JSON.stringify({ success: true, settings, socialLinks }), {
+    const servicesRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/services?select=service_key,name,price&active=eq.true&order=display_order.asc`,
+      { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+    );
+    const services = servicesRes.ok ? await servicesRes.json() : [];
+
+    return new Response(JSON.stringify({ success: true, settings, socialLinks, services }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
