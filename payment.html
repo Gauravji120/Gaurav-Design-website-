@@ -184,7 +184,7 @@ const SAMPLE_QR_IMG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA
     }
   })();
 
-  // If arriving from the order success page with ?order=GD-0001, show it
+  // If arriving from the order success page with ?order=GB-0001, show it
   const params = new URLSearchParams(window.location.search);
   const orderId = params.get('order');
   if (orderId) {
