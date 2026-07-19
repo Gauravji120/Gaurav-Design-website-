@@ -1,7 +1,7 @@
 import type { Context, Config } from "@netlify/functions";
 import { verifySession, getBearerToken } from "../lib/verify-session.mts";
 
-const FROM_EMAIL = "Gaurav Design <onboarding@resend.dev>";
+const FROM_EMAIL = "Going Beyond <onboarding@resend.dev>";
 
 export default async (req: Request, context: Context) => {
   if (req.method !== "POST") {
@@ -43,7 +43,7 @@ export default async (req: Request, context: Context) => {
       return new Response(JSON.stringify({ error: "Order not found" }), { status: 404 });
     }
 
-    const html = `<p>Hi ${order.client_name},</p><p>${message.replace(/\n/g, "<br>")}</p><p>— Gaurav Design</p>`;
+    const html = `<p>Hi ${order.client_name},</p><p>${message.replace(/\n/g, "<br>")}</p><p>— Going Beyond</p>`;
 
     const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
