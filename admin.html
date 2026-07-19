@@ -141,14 +141,26 @@
 
   <!-- PRICING & OFFERS -->
   <div class="panel" id="panel-pricing">
-    <h2>Pricing &amp; Offers</h2>
-    <div class="card">
+    <h2>Services &amp; Offers</h2>
+
+    <div class="card" style="margin-bottom:20px;">
+      <h3 style="font-size:.95rem; margin-bottom:14px;">Add a new service</h3>
       <div class="form-grid">
-        <div class="field"><label>Poster price (₹)</label><input type="number" id="priceposter"></div>
-        <div class="field"><label>YouTube thumbnail price (₹)</label><input type="number" id="pricethumbnail"></div>
-        <div class="field"><label>Packaging price (₹)</label><input type="number" id="pricepackaging"></div>
-        <div class="field"><label>Book design price (₹)</label><input type="number" id="pricebook"></div>
+        <div class="field"><label>Service name</label><input type="text" id="newServiceName" placeholder="e.g. Logo Design" style="width:100%;"></div>
+        <div class="field"><label>Price (₹)</label><input type="number" id="newServicePrice" placeholder="e.g. 199" style="width:100%;"></div>
       </div>
+      <button class="btn btn-green" id="addServiceBtn">+ Add service</button>
+      <div class="error-msg" id="serviceAddError"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <h3 style="font-size:.95rem; margin-bottom:14px;">Your services</h3>
+      <div id="servicesList" style="display:flex; flex-direction:column; gap:10px;"></div>
+      <div class="error-msg" id="servicesListError"></div>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:.95rem; margin-bottom:14px;">Offer banner</h3>
       <div class="field" style="margin-top:6px;">
         <label>Offer banner text</label>
         <input type="text" id="offertext" placeholder="e.g. Diwali Special — 20% off this week" style="width:100%;">
@@ -291,7 +303,7 @@
       const target = 'panel-' + btn.dataset.tab;
       panels.forEach(p => p.classList.toggle('active', p.id === target));
       if (btn.dataset.tab === 'orders') loadOrders();
-      if (btn.dataset.tab === 'pricing') loadSettings();
+      if (btn.dataset.tab === 'pricing') { loadSettings(); loadServices(); }
       if (btn.dataset.tab === 'coupons') loadCoupons();
       if (btn.dataset.tab === 'payment') { loadSettings(); loadSocialLinks(); }
       if (btn.dataset.tab === 'overview') loadOverview();
@@ -462,10 +474,6 @@
       const data = await res.json();
       if (!res.ok || !data.success) return;
       const s = data.settings;
-      document.getElementById('priceposter').value = s.price_poster ?? '';
-      document.getElementById('pricethumbnail').value = s.price_thumbnail ?? '';
-      document.getElementById('pricepackaging').value = s.price_packaging ?? '';
-      document.getElementById('pricebook').value = s.price_book ?? '';
       document.getElementById('offertext').value = s.offer_text ?? '';
       document.getElementById('offeractive').checked = !!s.offer_active;
       document.getElementById('upiid').value = s.upi_id ?? '';
@@ -485,10 +493,6 @@
         method: 'PATCH',
         headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
-          price_poster: Number(document.getElementById('priceposter').value),
-          price_thumbnail: Number(document.getElementById('pricethumbnail').value),
-          price_packaging: Number(document.getElementById('pricepackaging').value),
-          price_book: Number(document.getElementById('pricebook').value),
           offer_text: document.getElementById('offertext').value.trim(),
           offer_active: document.getElementById('offeractive').checked
         })
@@ -498,6 +502,104 @@
       else { err.textContent = data.error || 'Could not save'; err.style.display = 'block'; }
     } catch(e) {}
     btn.disabled = false; btn.textContent = 'Save changes';
+  });
+
+  // ===== Services (unlimited, dynamic) =====
+  async function loadServices(){
+    try {
+      const res = await apiFetch('/api/admin-services', { headers: authHeaders() });
+      const data = await res.json();
+      if (!res.ok || !data.success) return;
+      renderServicesList(data.services || []);
+    } catch(e) {}
+  }
+
+  function renderServicesList(services){
+    const container = document.getElementById('servicesList');
+    if (!services.length) {
+      container.innerHTML = '<p style="color:var(--ink-soft); font-size:.82rem;">No services yet.</p>';
+      return;
+    }
+    container.innerHTML = services.map(svc => `
+      <div style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:4px; background:var(--paper); flex-wrap:wrap;">
+        <strong style="flex:1; min-width:140px;">${svc.name}</strong>
+        <span style="font-family:var(--mono);">₹</span>
+        <input type="number" value="${svc.price}" data-price-id="${svc.id}" style="width:90px; padding:6px 8px;">
+        <button class="btn btn-sm" data-save-id="${svc.id}">Save</button>
+        <label style="display:flex; align-items:center; gap:5px; font-size:.78rem;">
+          <input type="checkbox" data-active-id="${svc.id}" ${svc.active ? 'checked' : ''}> Active
+        </label>
+        <button class="btn btn-sm" data-remove-id="${svc.id}" style="background:var(--carbon-red);">Remove</button>
+      </div>
+    `).join('');
+
+    container.querySelectorAll('[data-save-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.saveId;
+        const price = container.querySelector(`[data-price-id="${id}"]`).value;
+        btn.disabled = true; btn.textContent = 'Saving…';
+        try {
+          await apiFetch('/api/admin-services', {
+            method: 'PATCH',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ id, price: Number(price) })
+          });
+        } catch(e) {}
+        btn.disabled = false; btn.textContent = 'Save';
+      });
+    });
+    container.querySelectorAll('[data-active-id]').forEach(cb => {
+      cb.addEventListener('change', async () => {
+        const id = cb.dataset.activeId;
+        try {
+          await apiFetch('/api/admin-services', {
+            method: 'PATCH',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ id, active: cb.checked })
+          });
+        } catch(e) {}
+      });
+    });
+    container.querySelectorAll('[data-remove-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true; btn.textContent = 'Removing…';
+        try {
+          await apiFetch('/api/admin-services?id=' + encodeURIComponent(btn.dataset.removeId), {
+            method: 'DELETE',
+            headers: authHeaders()
+          });
+          loadServices();
+        } catch(e) { btn.disabled = false; btn.textContent = 'Remove'; }
+      });
+    });
+  }
+
+  document.getElementById('addServiceBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('addServiceBtn');
+    const err = document.getElementById('serviceAddError');
+    err.style.display = 'none';
+    const name = document.getElementById('newServiceName').value.trim();
+    const price = document.getElementById('newServicePrice').value;
+    if (!name || !price || Number(price) <= 0) {
+      err.textContent = 'Enter a valid name and price.'; err.style.display = 'block'; return;
+    }
+    btn.disabled = true; btn.textContent = 'Adding…';
+    try {
+      const res = await apiFetch('/api/admin-services', {
+        method: 'POST',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ name, price: Number(price) })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        document.getElementById('newServiceName').value = '';
+        document.getElementById('newServicePrice').value = '';
+        loadServices();
+      } else {
+        err.textContent = data.error || 'Could not add service'; err.style.display = 'block';
+      }
+    } catch(e) {}
+    btn.disabled = false; btn.textContent = '+ Add service';
   });
 
   document.getElementById('saveSocialBtn').addEventListener('click', async () => {
