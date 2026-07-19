@@ -1,7 +1,7 @@
 import type { Context, Config } from "@netlify/functions";
 import { verifySession, getBearerToken } from "../lib/verify-session.mts";
 
-const FROM_EMAIL = "Gaurav Design <onboarding@resend.dev>";
+const FROM_EMAIL = "Going Beyond <onboarding@resend.dev>";
 
 async function sendEmail(resendKey: string, to: string, subject: string, html: string) {
   try {
@@ -132,19 +132,19 @@ export default async (req: Request, context: Context) => {
         const templates: Record<string, { subject: string; html: string }> = {
           "Order Confirmed": {
             subject: `Order ${order.order_number} confirmed — work starts soon`,
-            html: `<p>Hi ${order.client_name},</p><p>Your order has been confirmed and is next in line for design work.</p><p><strong>Order ID:</strong> ${order.order_number}<br><strong>Status:</strong> Order Confirmed</p><p>I'll notify you as soon as the design work begins.</p><p>— Gaurav Design</p>`,
+            html: `<p>Hi ${order.client_name},</p><p>Your order has been confirmed and is next in line for design work.</p><p><strong>Order ID:</strong> ${order.order_number}<br><strong>Status:</strong> Order Confirmed</p><p>I'll notify you as soon as the design work begins.</p><p>— Going Beyond</p>`,
           },
           "Design in Progress": {
             subject: `Your design for order ${order.order_number} is underway`,
-            html: `<p>Hi ${order.client_name},</p><p>Good news — work on your order has started.</p><p><strong>Order ID:</strong> ${order.order_number}<br><strong>Status:</strong> Design in Progress</p><p>— Gaurav Design</p>`,
+            html: `<p>Hi ${order.client_name},</p><p>Good news — work on your order has started.</p><p><strong>Order ID:</strong> ${order.order_number}<br><strong>Status:</strong> Design in Progress</p><p>— Going Beyond</p>`,
           },
           "Review": {
             subject: `Order ${order.order_number} is ready for your review`,
-            html: `<p>Hi ${order.client_name},</p><p>Your design is ready for review. I'll be in touch with the file shortly — if you have any change requests, let me know.</p><p><strong>Order ID:</strong> ${order.order_number}<br><strong>Status:</strong> Review</p><p>— Gaurav Design</p>`,
+            html: `<p>Hi ${order.client_name},</p><p>Your design is ready for review. I'll be in touch with the file shortly — if you have any change requests, let me know.</p><p><strong>Order ID:</strong> ${order.order_number}<br><strong>Status:</strong> Review</p><p>— Going Beyond</p>`,
           },
           "Order Delivered": {
             subject: `Order ${order.order_number} delivered — thank you!`,
-            html: `<p>Hi ${order.client_name},</p><p>Your order is complete and has been delivered.</p><p><strong>Order ID:</strong> ${order.order_number}<br><strong>Status:</strong> Order Delivered</p><p>Thank you for choosing Gaurav Design. If you're happy with the work, a review or referral means a lot!</p><p>— Gaurav Design</p>`,
+            html: `<p>Hi ${order.client_name},</p><p>Your order is complete and has been delivered.</p><p><strong>Order ID:</strong> ${order.order_number}<br><strong>Status:</strong> Order Delivered</p><p>Thank you for choosing Going Beyond. If you're happy with the work, a review or referral means a lot!</p><p>— Going Beyond</p>`,
           },
         };
         const tpl = templates[status];
@@ -160,7 +160,7 @@ export default async (req: Request, context: Context) => {
           RESEND_KEY,
           order.email,
           `Payment received for order ${order.order_number}`,
-          `<p>Hi ${order.client_name},</p><p>We've received your payment for order #${order.order_number}. Thank you!</p><p>— Gaurav Design</p>`
+          `<p>Hi ${order.client_name},</p><p>We've received your payment for order #${order.order_number}. Thank you!</p><p>— Going Beyond</p>`
         );
         await logEmail(SUPABASE_URL, SERVICE_KEY, order.id, "Payment Confirmed", order.email, sent ? "Success" : "Failed");
       }
