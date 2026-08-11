@@ -64,6 +64,28 @@ export default async (req: Request, context: Context) => {
     return new Response(JSON.stringify({ error: "Server not configured" }), { status: 500 });
   }
 
+  // Check if the admin has paused new orders — this must be enforced here,
+  // not just hidden on the frontend, otherwise someone could still POST directly.
+  try {
+    const pauseRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/site_settings?id=eq.1&select=orders_paused,orders_paused_message`,
+      { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
+    );
+    if (pauseRes.ok) {
+      const [row] = await pauseRes.json();
+      if (row?.orders_paused) {
+        return new Response(
+          JSON.stringify({
+            error: row.orders_paused_message || "We're not accepting new orders right now. Please check back soon.",
+          }),
+          { status: 503 }
+        );
+      }
+    }
+  } catch {
+    // If the pause-check itself fails, don't block real orders over it — continue.
+  }
+
   try {
     const formData = await req.formData();
 
