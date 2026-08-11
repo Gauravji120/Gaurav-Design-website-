@@ -98,6 +98,8 @@
 </div>
 
 <div class="form-wrap">
+  <div id="ordersPausedBox" style="display:none; background:var(--paper-alt); border:1px solid var(--carbon-red); border-left:4px solid var(--carbon-red); padding:20px; text-align:center; font-size:.95rem; margin-bottom:20px;"></div>
+
   <form class="form-card" name="order" id="orderForm" enctype="multipart/form-data">
     <p style="display:none;"><label>Don't fill this: <input name="bot-field"></label></p>
 
@@ -240,6 +242,17 @@
       const res = await fetch('/api/site-settings');
       if (!res.ok) return;
       const data = await res.json();
+      const s = data.settings || {};
+
+      // If the admin has paused new orders, hide the form entirely and show why.
+      if (s.orders_paused) {
+        document.getElementById('orderForm').style.display = 'none';
+        const pausedBox = document.getElementById('ordersPausedBox');
+        pausedBox.textContent = s.orders_paused_message || "We're not accepting new orders right now. Please check back soon, or message us on WhatsApp.";
+        pausedBox.style.display = 'block';
+        return;
+      }
+
       const services = data.services || [];
       if (!services.length) return;
 
