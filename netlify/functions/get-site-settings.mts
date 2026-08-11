@@ -17,7 +17,7 @@ export default async (req: Request, context: Context) => {
 
   try {
     const settingsRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/site_settings?id=eq.1&select=price_poster,price_thumbnail,price_packaging,price_book,offer_text,offer_active,upi_id,upi_qr_url,instagram_url,instagram_qr_url,pinterest_url,whatsapp_number`,
+      `${SUPABASE_URL}/rest/v1/site_settings?id=eq.1&select=price_poster,price_thumbnail,price_packaging,price_book,offer_text,offer_active,upi_id,upi_qr_url,instagram_url,instagram_qr_url,pinterest_url,whatsapp_number,orders_paused,orders_paused_message`,
       { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } }
     );
 
