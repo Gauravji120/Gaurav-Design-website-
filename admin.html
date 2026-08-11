@@ -173,6 +173,22 @@
       <div class="save-note" id="pricingSaveNote">✓ Saved — changes are live now.</div>
       <div class="error-msg" id="pricingError"></div>
     </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h3 style="font-size:.95rem; margin-bottom:14px;">Pause new orders</h3>
+      <p style="font-size:.82rem; color:var(--ink-soft); margin-bottom:14px;">Turn this on when you have too much work and want to temporarily stop accepting new orders. The Order page will show your message instead of the form.</p>
+      <div class="field" style="display:flex; align-items:center; gap:10px;">
+        <label style="margin:0;">Orders paused</label>
+        <label class="toggle-switch"><input type="checkbox" id="orderspaused"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="field" style="margin-top:10px;">
+        <label>Message shown to clients (optional)</label>
+        <input type="text" id="orderspausedmessage" placeholder="e.g. Fully booked this week — back Monday!" style="width:100%;">
+      </div>
+      <button class="btn" id="savePauseBtn">Save changes</button>
+      <div class="save-note" id="pauseSaveNote">✓ Saved — changes are live now.</div>
+      <div class="error-msg" id="pauseError"></div>
+    </div>
   </div>
 
   <!-- COUPONS -->
@@ -476,6 +492,8 @@
       const s = data.settings;
       document.getElementById('offertext').value = s.offer_text ?? '';
       document.getElementById('offeractive').checked = !!s.offer_active;
+      document.getElementById('orderspaused').checked = !!s.orders_paused;
+      document.getElementById('orderspausedmessage').value = s.orders_paused_message ?? '';
       document.getElementById('upiid').value = s.upi_id ?? '';
       document.getElementById('whatsappnumber').value = s.whatsapp_number ?? '';
       settingsLoaded = true;
@@ -495,6 +513,28 @@
         body: JSON.stringify({
           offer_text: document.getElementById('offertext').value.trim(),
           offer_active: document.getElementById('offeractive').checked
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) { note.style.display = 'block'; }
+      else { err.textContent = data.error || 'Could not save'; err.style.display = 'block'; }
+    } catch(e) {}
+    btn.disabled = false; btn.textContent = 'Save changes';
+  });
+
+  document.getElementById('savePauseBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('savePauseBtn');
+    const note = document.getElementById('pauseSaveNote');
+    const err = document.getElementById('pauseError');
+    note.style.display = 'none'; err.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const res = await apiFetch('/api/admin-settings', {
+        method: 'PATCH',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          orders_paused: document.getElementById('orderspaused').checked,
+          orders_paused_message: document.getElementById('orderspausedmessage').value.trim()
         })
       });
       const data = await res.json();
