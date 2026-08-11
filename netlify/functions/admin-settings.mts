@@ -12,6 +12,8 @@ const ALLOWED_FIELDS = [
   "instagram_url",
   "pinterest_url",
   "whatsapp_number",
+  "orders_paused",
+  "orders_paused_message",
 ];
 
 export default async (req: Request, context: Context) => {
