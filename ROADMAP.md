@@ -16,6 +16,7 @@
 - [x] Reference-file viewing in Admin Dashboard via signed URLs
 - [x] "Pause new orders" switch — admin toggle + custom message; enforced both in the UI (order form hidden) and server-side (submit-order.mts rejects with 503 even if someone bypasses the frontend)
 - [x] Branded 404 error page
+- [x] Fixed critical bug: Home page pricing was invisible (opacity:0 from scroll-reveal animation never triggering on dynamically-inserted cards) — see CHANGELOG for full root cause
 
 ## 🔴 High Priority — Not Started
 
