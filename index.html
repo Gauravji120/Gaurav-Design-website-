@@ -229,7 +229,7 @@ const DATA_igQR = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAg
       const priceGrid = document.getElementById('priceGrid');
       if (priceGrid && services.length) {
         priceGrid.innerHTML = services.map(svc =>
-          `<div class="price-card reveal"><h3>${svc.name}</h3><div class="amt">₹${Number(svc.price).toLocaleString('en-IN')}</div></div>`
+          `<div class="price-card"><h3>${svc.name}</h3><div class="amt">₹${Number(svc.price).toLocaleString('en-IN')}</div></div>`
         ).join('');
       }
 
