@@ -2,6 +2,18 @@
 
 Dated history of what was built. Newest first.
 
+## Pause New Orders + 404 Page + Data-Loss Fix
+
+**Added**
+- `orders_paused`, `orders_paused_message` columns on `site_settings`
+- Admin Dashboard: "Pause new orders" toggle + custom client-facing message (Pricing & Offers tab)
+- Order page hides the form and shows the admin's message when paused; enforced again server-side in `submit-order.mts` (503 response) so it can't be bypassed by posting directly to the API
+- `404.html` — branded not-found page (Netlify serves this automatically for any unmatched route)
+- `README.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `CHANGELOG.md` — full project documentation added to the repo root so any future session can read the repo and understand the project without re-explaining from scratch
+
+**Fixed**
+- **Data loss:** the 4 original core services (Poster, YouTube thumbnail, Packaging design, Book design) had disappeared from the `services` table — only the later-added "Logo Design" row remained. This is why pricing showed correctly in the Admin Dashboard (which reads whatever rows exist) but the Home page looked broken/incomplete. Re-inserted all 4 with their original prices. Cause not fully confirmed — worth keeping an eye on if it recurs.
+
 ## Rebrand + Feature Batch (site renamed "Gaurav Design" → "Going Beyond")
 
 **Added**
