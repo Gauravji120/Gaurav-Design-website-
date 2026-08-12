@@ -14,6 +14,8 @@
 - [x] Dynamic Social Links — admin adds/removes unlimited platforms; renders in the **footer only**
 - [x] Rebrand: "Gaurav Design" → "Going Beyond" across all pages, emails, order-ID prefix (`GD-` → `GB-`)
 - [x] Reference-file viewing in Admin Dashboard via signed URLs
+- [x] "Pause new orders" switch — admin toggle + custom message; enforced both in the UI (order form hidden) and server-side (submit-order.mts rejects with 503 even if someone bypasses the frontend)
+- [x] Branded 404 error page
 
 ## 🔴 High Priority — Not Started
 
@@ -74,7 +76,6 @@
 
 - [ ] Bulk status-change actions
 - [ ] CSV/Excel export of orders
-- [ ] "Pause new orders" switch
 - [ ] Most-ordered-service widget
 - [ ] Monthly income report
 - [ ] Client repeat-order rate
