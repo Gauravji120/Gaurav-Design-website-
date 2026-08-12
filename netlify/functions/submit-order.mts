@@ -109,6 +109,22 @@ export default async (req: Request, context: Context) => {
     if (!Number.isInteger(quantity) || quantity < 1) quantity = 1;
     if (quantity > 100) quantity = 100;
 
+    // If the client is logged in, the frontend sends their Supabase access token —
+    // verify it server-side and link the order to their account. Optional for now
+    // (old guest-order behaviour still works) until the Order page requires login.
+    let userId: string | null = null;
+    const authHeader = req.headers.get("Authorization") || "";
+    const accessToken = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (accessToken) {
+      const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+        headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${accessToken}` },
+      });
+      if (userRes.ok) {
+        const user = await userRes.json();
+        userId = user?.id || null;
+      }
+    }
+
     if (
       !name ||
       !isValidEmail(email) ||
@@ -210,6 +226,7 @@ export default async (req: Request, context: Context) => {
         total_price: totalPrice,
         coupon_code: appliedCouponCode,
         discount_percent: appliedDiscountPercent,
+        user_id: userId,
       }),
     });
 
