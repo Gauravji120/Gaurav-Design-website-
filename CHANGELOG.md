@@ -2,6 +2,16 @@
 
 Dated history of what was built. Newest first.
 
+## Fixed: Invisible Pricing Bug (Home Page)
+
+**Bug:** Home page pricing section appeared completely blank to the user — but the text was actually present in the DOM (selectable/copyable), just not visible. Confirmed via direct API test (`/api/site-settings` returned correct data every time) that the backend, database, and env vars were all fine — the bug was 100% client-side.
+
+**Root cause:** The site has a scroll-reveal animation system: elements with class `reveal` start at `opacity:0` and only become visible once an `IntersectionObserver` (set up once, at page load) adds a `.show` class to them. `querySelectorAll('.reveal')` runs synchronously at load time and only captures elements that already exist in the DOM at that moment. The dynamic price cards (rendered later, after the async `/api/site-settings` fetch resolves) were created with `class="price-card reveal"` — since they didn't exist yet when the observer was set up, they were never observed, never got `.show`, and stayed permanently invisible while still being real, selectable DOM text.
+
+**Fix:** Removed the `reveal` class from the dynamically-generated price card template in `index.html`. Dynamically-inserted content doesn't need (and shouldn't have) the load-time scroll-reveal class — only static elements present at initial page load should use it.
+
+**Lesson for future dynamic content:** Any HTML injected via JavaScript after page load (services, social links, coupons UI, etc.) must NOT include the `reveal` class, or it will silently render invisible-but-selectable, which is a very confusing bug to diagnose from database/API checks alone since the data layer looks completely correct.
+
 ## Pause New Orders + 404 Page + Data-Loss Fix
 
 **Added**
