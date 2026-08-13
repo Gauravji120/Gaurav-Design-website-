@@ -50,7 +50,7 @@ export default async (req: Request, context: Context) => {
     const query = new URLSearchParams({
       user_id: `eq.${userId}`,
       select:
-        "order_number,service,size,deadline,status,payment_status,quantity,total_price,created_at",
+        "order_number,service,size,deadline,status,payment_status,quantity,total_price,created_at,delivery_method",
       order: "created_at.desc",
     });
 

@@ -102,6 +102,7 @@ export default async (req: Request, context: Context) => {
     const size = (formData.get("size") as string || "").trim();
     const deadline = (formData.get("deadline") as string || "").trim();
     const details = (formData.get("details") as string || "").trim();
+    const deliveryMethod = (formData.get("deliveryMethod") as string || "Email").trim();
     const couponCodeInput = (formData.get("coupon_code") as string || "").trim().toUpperCase();
     const file = formData.get("reference") as File | null;
 
@@ -227,6 +228,7 @@ export default async (req: Request, context: Context) => {
         coupon_code: appliedCouponCode,
         discount_percent: appliedDiscountPercent,
         user_id: userId,
+        delivery_method: deliveryMethod,
       }),
     });
 

@@ -54,6 +54,9 @@
   }
   select:focus{outline:2px solid var(--carbon-red); outline-offset:1px;}
   select option{background:var(--white); color:var(--ink);}
+  .delivery-options{display:flex; gap:16px;}
+  .delivery-option{display:flex; align-items:center; gap:7px; font-size:.9rem; font-weight:600; cursor:pointer; width:auto;}
+  .delivery-option input{width:auto; padding:0; cursor:pointer;}
   input:focus, select:focus, textarea:focus{outline:2px solid var(--carbon-red); outline-offset:1px;}
   .field-error{display:none; color:var(--carbon-red); font-size:.76rem; font-weight:600; margin-top:5px; font-family:var(--mono);}
   .field.invalid input, .field.invalid select, .field.invalid textarea{border-color:var(--carbon-red); outline:1px solid var(--carbon-red);}
@@ -190,6 +193,19 @@
       <label>Text content &amp; details</label>
       <textarea name="details" rows="4" placeholder="Exact text, names, numbers, and any style notes." required></textarea>
       <span class="field-error" data-error-for="details"></span>
+    </div>
+
+    <div class="field">
+      <label>Preferred delivery method</label>
+      <div class="delivery-options">
+        <label class="delivery-option">
+          <input type="radio" name="deliveryMethod" value="Email" checked> Email
+        </label>
+        <label class="delivery-option">
+          <input type="radio" name="deliveryMethod" value="WhatsApp"> WhatsApp
+        </label>
+      </div>
+      <p class="form-note" style="margin-top:6px;">We'll send your final files this way once your order is complete.</p>
     </div>
 
     <div class="field">

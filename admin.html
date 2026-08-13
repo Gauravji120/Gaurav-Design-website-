@@ -380,6 +380,7 @@
         <div class="order-meta">
           <strong>${order.client_name}</strong> · ${order.email} · ${order.phone}<br>
           ${order.service} · Size: ${order.size || '—'} · Deadline: ${order.deadline || '—'}<br>
+          📦 Deliver via: <strong>${order.delivery_method || 'Email'}</strong><br>
           ${order.details ? order.details.slice(0,140) + (order.details.length>140?'…':'') : ''}
           ${order.reference_file_signed_url ? `<br>📎 <a href="${order.reference_file_signed_url}" target="_blank" style="color:var(--carbon-red); font-weight:700; text-decoration:underline;">View reference file</a>` : (order.reference_file_url ? '<br>📎 Reference file uploaded (link expired — refresh page)' : '')}
           ${order.coupon_code ? `<br>🎟 Coupon: ${order.coupon_code} (${order.discount_percent}% off)` : ''}
