@@ -43,10 +43,35 @@
   .card{background:var(--white); border:1px solid var(--line); padding:26px; margin-bottom:24px;}
   .card h2{font-size:1.05rem; font-weight:700; margin-bottom:16px; font-family:var(--mono);}
 
+  .card-head-row{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px;}
+  .card-head-row h2{margin-bottom:0;}
+  .muted-small{font-size:.72rem; color:var(--ink-soft); font-weight:400;}
+
   .profile-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
   @media(max-width:560px){.profile-grid{grid-template-columns:1fr;}}
   .profile-field label{display:block; font-size:.72rem; font-weight:700; margin-bottom:4px; font-family:var(--mono); color:var(--ink-soft);}
   .profile-field .val{font-size:.94rem; padding:9px 0;}
+
+  .field label{display:block; font-size:.72rem; font-weight:700; margin-bottom:6px; font-family:var(--mono); color:var(--ink-soft);}
+  input, select{
+    width:100%; padding:10px 12px; border:1px solid var(--line); background:var(--paper);
+    color:var(--ink); font-family:var(--sans); font-size:.9rem; border-radius:2px;
+  }
+  input:disabled{opacity:.65; cursor:not-allowed;}
+  input:focus, select:focus{outline:2px solid var(--carbon-red); outline-offset:1px;}
+  select{
+    appearance:none; -webkit-appearance:none; -moz-appearance:none; cursor:pointer;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%231F2A38' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat; background-position:right 12px center; background-size:11px 7px; padding-right:34px;
+  }
+  [data-theme="dark"] select{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%23ECE8DC' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  }
+  .btn{padding:12px 22px; border-radius:2px; font-weight:700; font-size:.86rem; border:none; cursor:pointer; background:var(--carbon-red); color:#fff; margin-top:16px;}
+  .btn:disabled{opacity:.6; cursor:not-allowed;}
+  .msg-box{display:none; font-size:.8rem; padding:10px 12px; margin-top:12px; border-left:4px solid; font-family:var(--mono);}
+  .msg-box.error{display:block; background:var(--paper-alt); border-color:var(--carbon-red); color:var(--carbon-red);}
+  .msg-box.success{display:block; background:var(--paper-alt); border-color:var(--ledger-green); color:var(--ledger-green);}
 
   table{width:100%; border-collapse:collapse; font-size:.86rem;}
   th{text-align:left; font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); padding:10px 8px; border-bottom:2px solid var(--line); white-space:nowrap;}
@@ -86,13 +111,60 @@
 
 <div class="wrap">
   <div class="card">
-    <h2>Profile</h2>
-    <div class="profile-grid">
-      <div class="profile-field"><label>Name</label><div class="val" id="profName">—</div></div>
-      <div class="profile-field"><label>Email</label><div class="val" id="profEmail">—</div></div>
-      <div class="profile-field"><label>Phone</label><div class="val" id="profPhone">—</div></div>
-      <div class="profile-field"><label>Client Since</label><div class="val" id="profSince">—</div></div>
+    <div class="card-head-row">
+      <h2>Profile</h2>
+      <span class="mono muted-small" id="profSince"></span>
     </div>
+    <form id="profileForm">
+      <div class="profile-grid">
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="profName" required>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="profEmail" disabled>
+        </div>
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="tel" id="profPhone">
+        </div>
+        <div class="field">
+          <label>Alternate WhatsApp Number</label>
+          <input type="tel" id="profAltPhone" placeholder="If different from above">
+        </div>
+        <div class="field">
+          <label>Preferred Contact Method</label>
+          <select id="profContactPref">
+            <option value="Email">Email</option>
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="Phone Call">Phone Call</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Language Preference</label>
+          <select id="profLanguage">
+            <option value="Hindi">Hindi</option>
+            <option value="English">English</option>
+            <option value="Hinglish">Hinglish (Mix)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Birthday <span class="muted-small">(optional)</span></label>
+          <input type="date" id="profBirthday">
+        </div>
+        <div class="field" style="grid-column:1 / -1;">
+          <label>Address <span class="muted-small">(optional)</span></label>
+          <input type="text" id="profAddress" placeholder="For future printed/delivery orders">
+        </div>
+        <div class="field" style="grid-column:1 / -1;">
+          <label>Design Preferences <span class="muted-small">(optional)</span></label>
+          <input type="text" id="profDesignPref" placeholder="e.g. bold colors, minimal style — helps us on repeat orders">
+        </div>
+      </div>
+      <button type="submit" class="btn" id="profSaveBtn">Save Profile</button>
+      <div class="msg-box" id="profMsg"></div>
+    </form>
   </div>
 
   <div class="card">
@@ -119,10 +191,17 @@
     if (!session) { window.location.href = 'login.html'; return; }
 
     const user = session.user;
-    document.getElementById('profName').textContent = user.user_metadata?.full_name || '—';
-    document.getElementById('profEmail').textContent = user.email || '—';
-    document.getElementById('profPhone').textContent = user.user_metadata?.phone || '—';
-    document.getElementById('profSince').textContent = fmtDate(user.created_at);
+    const meta = user.user_metadata || {};
+    document.getElementById('profName').value = meta.full_name || '';
+    document.getElementById('profEmail').value = user.email || '';
+    document.getElementById('profPhone').value = meta.phone || '';
+    document.getElementById('profAltPhone').value = meta.alt_phone || '';
+    document.getElementById('profContactPref').value = meta.contact_pref || 'Email';
+    document.getElementById('profLanguage').value = meta.language_pref || 'Hindi';
+    document.getElementById('profBirthday').value = meta.birthday || '';
+    document.getElementById('profAddress').value = meta.address || '';
+    document.getElementById('profDesignPref').value = meta.design_pref || '';
+    document.getElementById('profSince').textContent = 'Client since ' + fmtDate(user.created_at);
 
     try {
       const res = await fetch('/api/my-orders', {
@@ -165,6 +244,33 @@
     }
   }
   init();
+
+  document.getElementById('profileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('profSaveBtn');
+    const msg = document.getElementById('profMsg');
+    btn.disabled = true; btn.textContent = 'Saving…'; msg.className = 'msg-box';
+
+    const { error } = await sb.auth.updateUser({
+      data: {
+        full_name: document.getElementById('profName').value.trim(),
+        phone: document.getElementById('profPhone').value.trim(),
+        alt_phone: document.getElementById('profAltPhone').value.trim(),
+        contact_pref: document.getElementById('profContactPref').value,
+        language_pref: document.getElementById('profLanguage').value,
+        birthday: document.getElementById('profBirthday').value,
+        address: document.getElementById('profAddress').value.trim(),
+        design_pref: document.getElementById('profDesignPref').value.trim(),
+      }
+    });
+
+    btn.disabled = false; btn.textContent = 'Save Profile';
+    if (error) {
+      msg.textContent = error.message; msg.className = 'msg-box error';
+    } else {
+      msg.textContent = 'Profile saved!'; msg.className = 'msg-box success';
+    }
+  });
 
   document.getElementById('logoutBtn').addEventListener('click', async () => {
     await sb.auth.signOut();
