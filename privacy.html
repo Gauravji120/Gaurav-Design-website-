@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>document.documentElement.classList.add('js');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Going Beyond</title>
+<meta name="description" content="How Going Beyond collects, uses, and protects your personal data, including Google Sign-in data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFEDE2; --paper-alt:#E6E2D3; --ink:#1F2A38; --ink-soft:#4A5563;
+    --carbon-red:#B23A2E; --stamp-mustard:#C9922A; --ledger-green:#4C6B54;
+    --line:#C9C4B2; --white:#FFFDF8; --mono:'JetBrains Mono', monospace; --sans:'Work Sans', sans-serif;
+  }
+  [data-theme="dark"]{
+    --paper:#171A1E; --paper-alt:#1E2228; --ink:#ECE8DC; --ink-soft:#A9A79B;
+    --carbon-red:#E0574A; --stamp-mustard:#E0AC4D; --ledger-green:#7FA98C;
+    --line:#3A3E44; --white:#20242A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.55;}
+  a{color:inherit; text-decoration:none;}
+  .mono{font-family:var(--mono);}
+  .wrap{max-width:760px; margin:0 auto; padding:0 24px;}
+
+  header.nav{position:sticky; top:0; z-index:50; background:var(--white); border-bottom:1px solid var(--line);}
+  .nav-inner{display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:1080px; margin:0 auto;}
+  .back-link{font-family:var(--mono); font-size:.82rem; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:6px;}
+  .brand{font-weight:700; font-size:.95rem;}
+  .icon-btn{width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:var(--paper); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:.95rem;}
+
+  .page-head{padding:48px 24px 28px; text-align:center;}
+  .page-head .eyebrow{font-family:var(--mono); font-size:.7rem; color:var(--carbon-red); font-weight:700; letter-spacing:.08em; margin-bottom:10px;}
+  .page-head h1{font-size:1.7rem; font-weight:700;}
+
+  .section{padding:0 24px 40px;}
+  .policy-card{background:var(--white); border:1px solid var(--line); padding:26px;}
+  .policy-card h3{font-size:.98rem; font-weight:700; margin:18px 0 8px;}
+  .policy-card h3:first-child{margin-top:0;}
+  .policy-card p, .policy-card li{color:var(--ink-soft); font-size:.88rem; line-height:1.6;}
+  .policy-card ul{margin-left:18px; margin-top:6px;}
+  .policy-card li{margin-bottom:6px;}
+  .intro-note{background:var(--paper-alt); border:1px solid var(--line); border-left:3px solid var(--carbon-red); padding:12px 16px; font-size:.86rem; color:var(--ink-soft); margin-bottom:20px;}
+
+  .policy-nav{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; padding:0 24px 32px; font-family:var(--mono); font-size:.78rem;}
+  .policy-nav a{padding:6px 12px; border:1px solid var(--line); border-radius:20px; color:var(--ink-soft);}
+  .policy-nav a.current{background:var(--carbon-red); color:#fff; border-color:var(--carbon-red);}
+
+  footer{padding:32px 24px; text-align:center; border-top:1px solid var(--line);}
+  footer p{color:var(--ink-soft); font-size:.8rem;}
+</style>
+</head>
+<body data-theme="light">
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="back-link">← Back to home</a>
+    <div class="brand">GOING BEYOND</div>
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
+  </div>
+</header>
+
+<div class="page-head">
+  <div class="eyebrow">POLICIES</div>
+  <h1>Privacy Policy</h1>
+</div>
+
+<div class="policy-nav">
+  <a href="terms.html">Terms of Service</a>
+  <a href="refund.html">Refund &amp; Order Policy</a>
+  <a href="privacy.html" class="current">Privacy Policy</a>
+</div>
+
+<section class="section">
+  <div class="wrap">
+    <div class="policy-card">
+      <p><em>Last updated: August 2026</em></p>
+
+      <p class="intro-note">Going Beyond (operated by Gaurav Adhikari) is the "Data Fiduciary" for the personal data collected through this website, under India's Digital Personal Data Protection Act, 2023.</p>
+
+      <h3>What information we collect</h3>
+      <p>When you create an account or place an order, we collect what you provide: your name, email address, phone number, and order details (service, size, deadline, reference files). Optional profile details (address, birthday, design preferences) are collected only if you choose to add them. If you sign up using "Continue with Google," we receive your name, email address, and profile photo from your Google account — nothing more.</p>
+
+      <h3>Why we collect it, and your consent</h3>
+      <p>We collect this information only to create your account, process and deliver your orders, and contact you about them. By creating an account or placing an order, you consent to this use. You can withdraw consent at any time by requesting account deletion (see "Your rights" below) — though this means we can no longer provide ongoing services like order tracking.</p>
+
+      <h3>Where your information is stored</h3>
+      <p>Your account and order data is stored securely with Supabase (our database and login provider). This website is hosted on Netlify, and order confirmation emails are sent through Resend. These providers only process your data to help us run the site — they don't use it for their own purposes. We don't sell your information, and we don't share it with advertisers.</p>
+
+      <h3>Cookies &amp; local storage</h3>
+      <p>When you log in, your session is saved in your browser (using local storage, which works like a cookie) so you don't have to log in again every time you visit. We also remember your dark/light mode choice this way. None of this is used for tracking or advertising. You can clear it anytime by logging out or clearing your browser data.</p>
+
+      <h3>Your Google account data</h3>
+      <p>If you sign in with Google, our use of your Google account information follows Google's API Services User Data Policy, including its Limited Use requirements — we use it only to create and manage your account on this site, never for anything else.</p>
+
+      <h3>Your rights</h3>
+      <p>Under the DPDP Act, you have the right to:</p>
+      <ul>
+        <li>Access the personal data we hold about you</li>
+        <li>Correct or update inaccurate details — most of this you can do yourself from the "My Account" page</li>
+        <li>Withdraw consent and request erasure of your account and data</li>
+        <li>Raise a grievance if you're unhappy with how your data has been handled</li>
+      </ul>
+      <p>To exercise any of these rights, contact us using the details below — we'll respond as soon as possible.</p>
+
+      <h3>Data retention</h3>
+      <p>We keep your account and order data for as long as your account is active, or as needed to meet legal/tax record-keeping requirements, whichever is longer. You can request deletion at any time as described above.</p>
+
+      <h3>Contact / Grievance Officer</h3>
+      <p>For any privacy questions, requests, or grievances: Gaurav Adhikari — <a href="mailto:gauravadhikari9289@gmail.com" style="color:var(--carbon-red); font-weight:700;">gauravadhikari9289@gmail.com</a> or <a href="https://wa.me/918368125261" target="_blank" style="color:var(--carbon-red); font-weight:700;">WhatsApp</a>.</p>
+    </div>
+  </div>
+</section>
+
+<footer><p>Going Beyond · Burari, Delhi NCR</p><p><a href="index.html">← Back to home</a></p></footer>
+
+<script>
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('gb_theme');
+  if (savedTheme) {
+    document.body.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+  }
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    const next = isDark ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', next);
+    themeToggle.textContent = isDark ? '🌙' : '☀️';
+    localStorage.setItem('gb_theme', next);
+  });
+</script>
+</body>
+</html>

@@ -63,6 +63,14 @@
   .policy-card li{margin-bottom:6px;}
   .agree-note{background:var(--paper-alt); border:1px solid var(--line); border-left:3px solid var(--carbon-red); padding:12px 16px; font-size:.82rem; color:var(--ink-soft); margin-top:18px;}
 
+  .policy-links-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;}
+  @media(max-width:680px){.policy-links-grid{grid-template-columns:1fr;}}
+  .policy-link-card{display:block; background:var(--white); border:1px solid var(--line); padding:22px; transition:transform .15s;}
+  .policy-link-card:hover{transform:translateY(-2px); border-color:var(--carbon-red);}
+  .policy-link-card h3{font-size:.94rem; font-weight:700; margin-bottom:8px;}
+  .policy-link-card p{color:var(--ink-soft); font-size:.82rem; margin-bottom:12px; line-height:1.5;}
+  .policy-link-card .read-more{font-family:var(--mono); font-size:.74rem; font-weight:700; color:var(--carbon-red);}
+
   .cta-band{background:var(--paper-alt); text-align:center; padding:48px 24px;}
   .cta-band h2{font-size:1.2rem; font-weight:700; margin-bottom:16px;}
   .btn{display:inline-flex; align-items:center; gap:6px; padding:11px 20px; border-radius:2px; font-weight:700; font-size:.86rem; border:none; cursor:pointer; background:var(--carbon-red); color:#fff;}
@@ -134,30 +142,26 @@
   </div>
 </section>
 
-<section class="section" id="refund">
+<section class="section" id="policies">
   <div class="wrap">
     <div class="section-sub">POLICIES</div>
-    <h2>Refund policy &amp; terms</h2>
-    <div class="policy-card">
-      <h3>Refund policy</h3>
-      <p>Payment confirms an order and reserves design time for it. Because of this:</p>
-      <ul>
-        <li>A full refund is available only if the design work has not yet started.</li>
-        <li>Once design work has started, the order is non-refundable, regardless of the stage it is in.</li>
-        <li>If an order cannot be completed due to an error on our side, a full refund will be issued.</li>
-      </ul>
-
-      <h3>Revisions</h3>
-      <p>Each order includes a reasonable number of revisions to match the brief you provided at the time of ordering. Requests that go beyond the original brief (a different design concept, a different size, or additional pages) may be quoted as a new order.</p>
-
-      <h3>Ownership &amp; usage rights</h3>
-      <p>Once an order is paid for and delivered, you own the rights to use the final design for your stated purpose (printing, posting, publishing).</p>
-      <p>Going Beyond retains the right to display completed work in the portfolio and on this website, unless you request otherwise in writing before the order is delivered.</p>
-
-      <h3>Copyright</h3>
-      <p>Any reference images, fonts, or brand assets you provide must be your own or properly licensed for use. Going Beyond is not responsible for copyright issues arising from material supplied by the client.</p>
-
-      <div class="agree-note">By placing an order, you confirm that you have read and agree to this Refund Policy and these Terms.</div>
+    <h2>Terms &amp; policies</h2>
+    <div class="policy-links-grid">
+      <a href="terms.html" class="policy-link-card">
+        <h3>Terms of Service</h3>
+        <p>Account rules, eligibility, payments, and liability.</p>
+        <span class="read-more">Read terms →</span>
+      </a>
+      <a href="refund.html" class="policy-link-card">
+        <h3>Refund &amp; Order Policy</h3>
+        <p>Refunds, revisions, ownership and copyright for your orders.</p>
+        <span class="read-more">Read policy →</span>
+      </a>
+      <a href="privacy.html" class="policy-link-card">
+        <h3>Privacy Policy</h3>
+        <p>What data we collect, why, and your rights under India's DPDP Act.</p>
+        <span class="read-more">Read policy →</span>
+      </a>
     </div>
   </div>
 </section>
