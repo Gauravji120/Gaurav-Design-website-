@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
   :root{
     --paper:#EFEDE2; --paper-alt:#E6E2D3; --ink:#1F2A38; --ink-soft:#4A5563;
@@ -111,7 +112,9 @@
   <p>Takes about two minutes.</p>
 </div>
 
-<div class="form-wrap">
+<div id="authCheckBox" style="text-align:center; padding:40px 24px; font-family:var(--mono); font-size:.85rem; color:var(--ink-soft);">Checking your login…</div>
+
+<div class="form-wrap" id="formWrap" style="display:none;">
   <div id="ordersPausedBox" style="display:none; background:var(--paper-alt); border:1px solid var(--carbon-red); border-left:4px solid var(--carbon-red); padding:20px; text-align:center; font-size:.95rem; margin-bottom:20px;"></div>
 
   <form class="form-card" name="order" id="orderForm" enctype="multipart/form-data">
@@ -245,6 +248,30 @@
 </footer>
 
 <script>
+  // ---- Auth gate: an account is required to place an order ----
+  const SUPABASE_URL = "https://ysujkmmwwknjraofcixr.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzdWprbW13d2tuanJhb2ZjaXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNDQ4NzksImV4cCI6MjA5ODgyMDg3OX0.t8WpzFmQpE2kJj5w0XuVZV5QeeAcYCpJZspgqnJjNFU";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let currentSession = null;
+
+  (async function authGate(){
+    const { data } = await sb.auth.getSession();
+    if (!data.session) {
+      window.location.href = 'login.html?next=order.html';
+      return;
+    }
+    currentSession = data.session;
+
+    // Autofill known details from the account so returning clients don't retype them
+    const meta = data.session.user.user_metadata || {};
+    if (meta.full_name) document.querySelector('input[name="name"]').value = meta.full_name;
+    if (data.session.user.email) document.querySelector('input[name="email"]').value = data.session.user.email;
+    if (meta.phone) document.querySelector('input[name="phone"]').value = meta.phone;
+
+    document.getElementById('authCheckBox').style.display = 'none';
+    document.getElementById('formWrap').style.display = 'block';
+  })();
+
   const toggle = document.getElementById('themeToggle');
   const body = document.body;
   try {
@@ -453,6 +480,7 @@
       const formData = new FormData(orderForm);
       const res = await fetch('/api/submit-order', {
         method: 'POST',
+        headers: currentSession ? { Authorization: `Bearer ${currentSession.access_token}` } : {},
         body: formData
       });
 

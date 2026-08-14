@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script>document.documentElement.classList.add('js');</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login / Sign Up — Going Beyond</title>
+<title>Get Started — Going Beyond</title>
 <meta name="description" content="Log in or create your Going Beyond account to place orders and track your order history.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,44 +40,50 @@
   .brand-row .tag{font-family:var(--mono); font-size:.68rem; color:var(--carbon-red); letter-spacing:.1em; margin-top:4px;}
 
   .card{background:var(--white); border:1px solid var(--line); padding:28px;}
+  .card h1{font-size:1.15rem; font-weight:700; text-align:center; margin-bottom:6px;}
+  .card .sub{font-size:.82rem; color:var(--ink-soft); text-align:center; margin-bottom:22px; line-height:1.5;}
 
-  .tabs{display:flex; border:1px solid var(--line); border-radius:2px; margin-bottom:22px; overflow:hidden;}
-  .tab{flex:1; text-align:center; padding:11px 0; font-family:var(--mono); font-size:.8rem; font-weight:700; cursor:pointer; color:var(--ink-soft); background:var(--paper-alt); transition:all .15s;}
-  .tab.active{background:var(--carbon-red); color:#fff;}
-
-  form{display:none;}
-  form.active{display:block;}
+  .step{display:none;}
+  .step.active{display:block;}
 
   .field{margin-bottom:14px;}
   label{display:block; font-size:.74rem; font-weight:700; margin-bottom:6px; font-family:var(--mono); color:var(--ink-soft);}
-  .pw-wrap{position:relative;}
-  input{width:100%; padding:11px 12px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:.9rem; border-radius:2px;}
+  input{width:100%; padding:12px 12px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:.95rem; border-radius:2px; text-align:center; letter-spacing:.02em;}
+  input#emailInput{text-align:left; letter-spacing:normal;}
   input:focus{outline:2px solid var(--carbon-red); outline-offset:1px;}
-  .pw-toggle{position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:.9rem; color:var(--ink-soft);}
-  .field-error{display:none; color:var(--carbon-red); font-size:.74rem; font-weight:600; margin-top:5px; font-family:var(--mono);}
-  .field.invalid input{border-color:var(--carbon-red); outline:1px solid var(--carbon-red);}
-  .field.invalid .field-error{display:block;}
 
-  .btn{width:100%; padding:13px; border-radius:2px; font-weight:700; font-size:.88rem; border:none; cursor:pointer; background:var(--carbon-red); color:#fff; margin-top:8px; transition:transform .15s;}
+  .btn{width:100%; padding:14px; border-radius:2px; font-weight:700; font-size:.9rem; border:none; cursor:pointer; background:var(--carbon-red); color:#fff; margin-top:8px; transition:transform .15s;}
   .btn:hover{transform:translateY(-2px);}
   .btn:disabled{opacity:.6; cursor:not-allowed; transform:none;}
+  .btn-link{width:100%; text-align:center; background:none; border:none; color:var(--ink-soft); font-family:var(--mono); font-size:.78rem; padding:12px 0 0; cursor:pointer;}
+  .btn-link:hover{color:var(--carbon-red);}
 
   .divider{display:flex; align-items:center; gap:10px; margin:18px 0; font-family:var(--mono); font-size:.7rem; color:var(--ink-soft);}
   .divider::before, .divider::after{content:''; flex:1; height:1px; background:var(--line);}
 
   .google-btn{
     width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
-    padding:11px; border:1px solid var(--line); background:var(--white); color:var(--ink);
-    font-family:var(--sans); font-weight:600; font-size:.86rem; border-radius:2px; cursor:pointer;
+    padding:13px; border:1px solid var(--line); background:var(--white); color:var(--ink);
+    font-family:var(--sans); font-weight:600; font-size:.92rem; border-radius:2px; cursor:pointer;
   }
   .google-btn:hover{background:var(--paper-alt);}
-  .google-btn svg{width:18px; height:18px;}
+  .google-btn svg{width:20px; height:20px;}
+
+  .email-btn{
+    width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
+    padding:13px; border:1px solid var(--line); background:var(--white); color:var(--ink);
+    font-family:var(--sans); font-weight:600; font-size:.92rem; border-radius:2px; cursor:pointer; margin-top:12px;
+  }
+  .email-btn:hover{background:var(--paper-alt);}
 
   .msg-box{display:none; font-size:.8rem; padding:10px 12px; margin-top:14px; border-left:4px solid; font-family:var(--mono);}
   .msg-box.error{display:block; background:var(--paper-alt); border-color:var(--carbon-red); color:var(--carbon-red);}
   .msg-box.success{display:block; background:var(--paper-alt); border-color:var(--ledger-green); color:var(--ledger-green);}
 
-  .hint{font-size:.72rem; color:var(--ink-soft); margin-top:6px; line-height:1.4;}
+  .sent-icon{font-size:2.2rem; text-align:center; margin-bottom:10px;}
+  .sent-email{font-weight:700; text-align:center; margin-bottom:4px;}
+
+  .hint{font-size:.72rem; color:var(--ink-soft); margin-top:14px; line-height:1.4; text-align:center;}
   .back-row{text-align:center; margin-top:18px;}
   .back-row a{font-family:var(--mono); font-size:.76rem; color:var(--ink-soft);}
   .back-row a:hover{color:var(--carbon-red);}
@@ -94,69 +100,53 @@
   </div>
 
   <div class="card">
-    <div class="tabs">
-      <div class="tab active" data-tab="login">Log In</div>
-      <div class="tab" data-tab="signup">Sign Up</div>
+
+    <!-- STEP 1: choose Google or Email -->
+    <div class="step active" id="stepChoose">
+      <h1>Welcome</h1>
+      <p class="sub">Log in or create your account — whichever you need, we'll figure it out.</p>
+
+      <button type="button" class="google-btn" id="googleBtn">
+        <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4.5 24 4.5 12.98 4.5 4 13.48 4 24.5S12.98 44.5 24 44.5 44 35.52 44 24.5c0-1.4-.15-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4.5 24 4.5c-7.5 0-14 4.2-17.7 10.2z"/><path fill="#4CAF50" d="M24 44.5c5.5 0 10.4-1.9 14.2-5.1l-6.5-5.5c-2 1.4-4.6 2.2-7.7 2.2-5.2 0-9.6-3.3-11.3-8l-6.6 5.1C9.9 40.2 16.4 44.5 24 44.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.5 5.5C41.6 35.9 44 30.7 44 24.5c0-1.4-.15-2.7-.4-4z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="divider">OR</div>
+
+      <button type="button" class="email-btn" id="showEmailBtn">
+        ✉️ Continue with Email
+      </button>
+
+      <div class="hint">By continuing, you agree to our <a href="terms.html" style="color:var(--carbon-red); font-weight:700;">Terms</a>, <a href="refund.html" style="color:var(--carbon-red); font-weight:700;">Refund Policy</a> &amp; <a href="privacy.html" style="color:var(--carbon-red); font-weight:700;">Privacy Policy</a>.</div>
     </div>
 
-    <!-- LOGIN FORM -->
-    <form id="loginForm" class="active">
-      <div class="field" id="loginEmailField">
-        <label>Email</label>
-        <input type="email" id="loginEmail" autocomplete="email" required>
-      </div>
-      <div class="field" id="loginPwField">
-        <label>Password</label>
-        <div class="pw-wrap">
-          <input type="password" id="loginPw" autocomplete="current-password" required>
-          <button type="button" class="pw-toggle" data-target="loginPw">👁</button>
+    <!-- STEP 2: email entry -->
+    <div class="step" id="stepEmail">
+      <h1>Continue with Email</h1>
+      <p class="sub">We'll send you a secure login link — no password needed.</p>
+
+      <form id="emailForm">
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="emailInput" autocomplete="email" required placeholder="you@example.com">
         </div>
-      </div>
-      <button type="submit" class="btn" id="loginBtn">Log In</button>
-      <div class="msg-box" id="loginMsg"></div>
+        <button type="submit" class="btn" id="sendLinkBtn">Send Login Link</button>
+        <div class="msg-box" id="emailMsg"></div>
+      </form>
 
-      <div class="divider">OR CONTINUE WITH</div>
-      <button type="button" class="google-btn" id="googleLoginBtn">
-        <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4.5 24 4.5 12.98 4.5 4 13.48 4 24.5S12.98 44.5 24 44.5 44 35.52 44 24.5c0-1.4-.15-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4.5 24 4.5c-7.5 0-14 4.2-17.7 10.2z"/><path fill="#4CAF50" d="M24 44.5c5.5 0 10.4-1.9 14.2-5.1l-6.5-5.5c-2 1.4-4.6 2.2-7.7 2.2-5.2 0-9.6-3.3-11.3-8l-6.6 5.1C9.9 40.2 16.4 44.5 24 44.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.5 5.5C41.6 35.9 44 30.7 44 24.5c0-1.4-.15-2.7-.4-4z"/></svg>
-        Continue with Google
-      </button>
+      <button type="button" class="btn-link" id="backToChooseBtn">← Use Google instead</button>
+    </div>
 
-      <div class="hint">You'll stay logged in on this device until you log out.</div>
-    </form>
+    <!-- STEP 3: check your inbox -->
+    <div class="step" id="stepSent">
+      <div class="sent-icon">📩</div>
+      <h1>Check your email</h1>
+      <p class="sent-email" id="sentEmailText"></p>
+      <p class="sub">Click the link we sent you to continue. If you're new here, this also creates your account — no extra steps needed.</p>
+      <div class="hint">Didn't get it? Check your spam folder, or <span id="resendLink" style="color:var(--carbon-red); font-weight:700; cursor:pointer;">resend the link</span>.</div>
+      <button type="button" class="btn-link" id="backToChooseBtn2">← Use a different email</button>
+    </div>
 
-    <!-- SIGNUP FORM -->
-    <form id="signupForm">
-      <div class="field">
-        <label>Full Name</label>
-        <input type="text" id="signupName" autocomplete="name" required>
-      </div>
-      <div class="field">
-        <label>Email</label>
-        <input type="email" id="signupEmail" autocomplete="email" required>
-      </div>
-      <div class="field" id="signupPhoneField">
-        <label>Phone Number</label>
-        <input type="tel" id="signupPhone" autocomplete="tel" required>
-        <div class="field-error">Enter a valid 10-digit Indian mobile number.</div>
-      </div>
-      <div class="field">
-        <label>Password</label>
-        <div class="pw-wrap">
-          <input type="password" id="signupPw" autocomplete="new-password" minlength="6" required>
-          <button type="button" class="pw-toggle" data-target="signupPw">👁</button>
-        </div>
-      </div>
-      <button type="submit" class="btn" id="signupBtn">Create Account</button>
-      <div class="msg-box" id="signupMsg"></div>
-
-      <div class="divider">OR CONTINUE WITH</div>
-      <button type="button" class="google-btn" id="googleSignupBtn">
-        <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4.5 24 4.5 12.98 4.5 4 13.48 4 24.5S12.98 44.5 24 44.5 44 35.52 44 24.5c0-1.4-.15-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4.5 24 4.5c-7.5 0-14 4.2-17.7 10.2z"/><path fill="#4CAF50" d="M24 44.5c5.5 0 10.4-1.9 14.2-5.1l-6.5-5.5c-2 1.4-4.6 2.2-7.7 2.2-5.2 0-9.6-3.3-11.3-8l-6.6 5.1C9.9 40.2 16.4 44.5 24 44.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.5 5.5C41.6 35.9 44 30.7 44 24.5c0-1.4-.15-2.7-.4-4z"/></svg>
-        Continue with Google
-      </button>
-
-      <div class="hint">By signing up, you agree to our <a href="terms.html" style="color:var(--carbon-red); font-weight:700;">Terms</a>, <a href="refund.html" style="color:var(--carbon-red); font-weight:700;">Refund Policy</a> &amp; <a href="privacy.html" style="color:var(--carbon-red); font-weight:700;">Privacy Policy</a>.</div>
-    </form>
   </div>
 
   <div class="back-row">
@@ -170,111 +160,76 @@
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzdWprbW13d2tuanJhb2ZjaXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNDQ4NzksImV4cCI6MjA5ODgyMDg3OX0.t8WpzFmQpE2kJj5w0XuVZV5QeeAcYCpJZspgqnJjNFU";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // ---- If already logged in, skip straight to account page ----
+  // ---- Where to send the user after login (defaults to My Account) ----
+  const nextParam = new URLSearchParams(window.location.search).get('next');
+  const nextPage = (nextParam && /^[a-zA-Z0-9_-]+\.html$/.test(nextParam)) ? nextParam : 'account.html';
+
+  // ---- If already logged in, skip straight there ----
   sb.auth.getSession().then(({ data }) => {
-    if (data.session) window.location.href = 'account.html';
+    if (data.session) window.location.href = nextPage;
   });
 
-  // ---- Tabs ----
-  const tabs = document.querySelectorAll('.tab');
-  const forms = { login: document.getElementById('loginForm'), signup: document.getElementById('signupForm') };
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      Object.values(forms).forEach(f => f.classList.remove('active'));
-      forms[tab.dataset.tab].classList.add('active');
-    });
-  });
-
-  // ---- Password show/hide ----
-  document.querySelectorAll('.pw-toggle').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const input = document.getElementById(btn.dataset.target);
-      input.type = input.type === 'password' ? 'text' : 'password';
-      btn.textContent = input.type === 'password' ? '👁' : '🙈';
-    });
-  });
-
-  function showMsg(el, text, type){
-    el.textContent = text;
-    el.className = 'msg-box ' + type;
+  // ---- Step switching ----
+  const steps = { choose: document.getElementById('stepChoose'), email: document.getElementById('stepEmail'), sent: document.getElementById('stepSent') };
+  function showStep(name){
+    Object.values(steps).forEach(s => s.classList.remove('active'));
+    steps[name].classList.add('active');
   }
-  function isValidPhone(phone){
-    return /^[6-9]\d{9}$/.test(phone.trim().replace(/^\+91[\s-]?/, ''));
-  }
+  document.getElementById('showEmailBtn').addEventListener('click', () => showStep('email'));
+  document.getElementById('backToChooseBtn').addEventListener('click', () => showStep('choose'));
+  document.getElementById('backToChooseBtn2').addEventListener('click', () => showStep('choose'));
 
-  // ---- Login ----
-  const loginForm = document.getElementById('loginForm');
-  const loginBtn = document.getElementById('loginBtn');
-  const loginMsg = document.getElementById('loginMsg');
+  // ---- Email magic link ----
+  let lastEmail = '';
+  async function sendLoginLink(){
+    const email = document.getElementById('emailInput').value.trim();
+    const btn = document.getElementById('sendLinkBtn');
+    const msg = document.getElementById('emailMsg');
+    btn.disabled = true; btn.textContent = 'Sending…'; msg.className = 'msg-box';
 
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    loginBtn.disabled = true; loginBtn.textContent = 'Logging in…';
-    loginMsg.className = 'msg-box';
-
-    const { error } = await sb.auth.signInWithPassword({
-      email: document.getElementById('loginEmail').value.trim(),
-      password: document.getElementById('loginPw').value,
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: true,
+        emailRedirectTo: window.location.origin + '/' + nextPage
+      }
     });
+
+    btn.disabled = false; btn.textContent = 'Send Login Link';
 
     if (error) {
-      showMsg(loginMsg, error.message === 'Invalid login credentials'
-        ? 'Incorrect email or password.' : error.message, 'error');
-      loginBtn.disabled = false; loginBtn.textContent = 'Log In';
+      msg.textContent = error.message; msg.className = 'msg-box error';
       return;
     }
-    window.location.href = 'account.html';
-  });
 
-  // ---- Signup ----
-  const signupForm = document.getElementById('signupForm');
-  const signupBtn = document.getElementById('signupBtn');
-  const signupMsg = document.getElementById('signupMsg');
-  const signupPhoneField = document.getElementById('signupPhoneField');
+    lastEmail = email;
+    document.getElementById('sentEmailText').textContent = email;
+    showStep('sent');
+  }
 
-  signupForm.addEventListener('submit', async (e) => {
+  document.getElementById('emailForm').addEventListener('submit', (e) => {
     e.preventDefault();
-    signupMsg.className = 'msg-box';
-
-    const name = document.getElementById('signupName').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const phone = document.getElementById('signupPhone').value.trim();
-    const password = document.getElementById('signupPw').value;
-
-    if (!isValidPhone(phone)) {
-      signupPhoneField.classList.add('invalid');
-      return;
-    }
-    signupPhoneField.classList.remove('invalid');
-
-    signupBtn.disabled = true; signupBtn.textContent = 'Creating account…';
-
-    const { error } = await sb.auth.signUp({
-      email, password,
-      options: { data: { full_name: name, phone: phone.replace(/^\+91[\s-]?/, '') } }
-    });
-
-    if (error) {
-      showMsg(signupMsg, error.message, 'error');
-      signupBtn.disabled = false; signupBtn.textContent = 'Create Account';
-      return;
-    }
-
-    showMsg(signupMsg, 'Account created! Redirecting…', 'success');
-    setTimeout(() => window.location.href = 'account.html', 900);
+    sendLoginLink();
   });
 
-  // ---- Google Sign-in (same handler from either tab) ----
-  function googleSignIn(){
+  document.getElementById('resendLink').addEventListener('click', async () => {
+    const el = document.getElementById('resendLink');
+    el.textContent = 'Sending…';
+    await sb.auth.signInWithOtp({
+      email: lastEmail,
+      options: { shouldCreateUser: true, emailRedirectTo: window.location.origin + '/' + nextPage }
+    });
+    el.textContent = 'Link resent!';
+    setTimeout(() => { el.textContent = 'resend the link'; }, 3000);
+  });
+
+  // ---- Google Sign-in ----
+  document.getElementById('googleBtn').addEventListener('click', () => {
     sb.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/account.html' }
+      options: { redirectTo: window.location.origin + '/' + nextPage }
     });
-  }
-  document.getElementById('googleLoginBtn').addEventListener('click', googleSignIn);
-  document.getElementById('googleSignupBtn').addEventListener('click', googleSignIn);
+  });
 
   // ---- Theme toggle (same pattern as rest of the site) ----
   const themeToggle = document.getElementById('themeToggle');
@@ -293,4 +248,3 @@
 </script>
 </body>
 </html>
-<!-- redeploy trigger: SECRETS_SCAN_OMIT_PATHS fix -->
