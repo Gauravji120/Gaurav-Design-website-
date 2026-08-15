@@ -1,6 +1,5 @@
 import type { Context, Config } from "@netlify/functions";
-
-const FROM_EMAIL = "Going Beyond <onboarding@resend.dev>";
+import { sendEmail } from "../lib/send-email.mts";
 
 // Client requests a revision on one of their own orders. We verify the
 // Supabase access token server-side and confirm the order actually belongs
@@ -13,7 +12,7 @@ export default async (req: Request, context: Context) => {
 
   const SUPABASE_URL = Netlify.env.get("SUPABASE_URL");
   const SERVICE_KEY = Netlify.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const RESEND_KEY = Netlify.env.get("RESEND_API_KEY");
+  const BREVO_KEY = Netlify.env.get("BREVO_API_KEY");
   const ADMIN_EMAIL = Netlify.env.get("ADMIN_NOTIFY_EMAIL") || "gauravadhikari9289@gmail.com";
 
   if (!SUPABASE_URL || !SERVICE_KEY) {
@@ -77,19 +76,13 @@ export default async (req: Request, context: Context) => {
     }
 
     // Best-effort notification to the admin — order is already saved either way
-    if (RESEND_KEY) {
-      try {
-        await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            from: FROM_EMAIL,
-            to: ADMIN_EMAIL,
-            subject: `Revision requested — ${order.order_number}`,
-            html: `<p>${order.client_name} requested a revision on <strong>${order.order_number}</strong> (${order.service}).</p><p><strong>Details:</strong><br>${notes.replace(/\n/g, "<br>")}</p>`,
-          }),
-        });
-      } catch {}
+    if (BREVO_KEY) {
+      await sendEmail(
+        BREVO_KEY,
+        ADMIN_EMAIL,
+        `Revision requested — ${order.order_number}`,
+        `<p>${order.client_name} requested a revision on <strong>${order.order_number}</strong> (${order.service}).</p><p><strong>Details:</strong><br>${notes.replace(/\n/g, "<br>")}</p>`
+      );
     }
 
     return new Response(JSON.stringify({ success: true }), {

@@ -1,20 +1,6 @@
 import type { Context, Config } from "@netlify/functions";
 import { verifySession, getBearerToken } from "../lib/verify-session.mts";
-
-const FROM_EMAIL = "Going Beyond <onboarding@resend.dev>";
-
-async function sendEmail(resendKey: string, to: string, subject: string, html: string) {
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: FROM_EMAIL, to, subject, html }),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
+import { sendEmail } from "../lib/send-email.mts";
 
 async function logEmail(supabaseUrl: string, serviceKey: string, orderId: string, emailType: string, sentTo: string, status: "Success" | "Failed") {
   try {
@@ -30,7 +16,7 @@ export default async (req: Request, context: Context) => {
   const SUPABASE_URL = Netlify.env.get("SUPABASE_URL");
   const SERVICE_KEY = Netlify.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const SESSION_SECRET = Netlify.env.get("ADMIN_SESSION_SECRET");
-  const RESEND_KEY = Netlify.env.get("RESEND_API_KEY");
+  const BREVO_KEY = Netlify.env.get("BREVO_API_KEY");
 
   if (!SUPABASE_URL || !SERVICE_KEY || !SESSION_SECRET) {
     return new Response(JSON.stringify({ error: "Server not configured" }), { status: 500 });
@@ -129,7 +115,7 @@ export default async (req: Request, context: Context) => {
       const [order] = await patchRes.json();
 
       // Send a status-change email to the client, if this update included a status change
-      if (status && RESEND_KEY && order?.email) {
+      if (status && BREVO_KEY && order?.email) {
         const templates: Record<string, { subject: string; html: string }> = {
           "Order Confirmed": {
             subject: `Order ${order.order_number} confirmed — work starts soon`,
@@ -150,15 +136,15 @@ export default async (req: Request, context: Context) => {
         };
         const tpl = templates[status];
         if (tpl) {
-          const sent = await sendEmail(RESEND_KEY, order.email, tpl.subject, tpl.html);
+          const sent = await sendEmail(BREVO_KEY, order.email, tpl.subject, tpl.html);
           await logEmail(SUPABASE_URL, SERVICE_KEY, order.id, `Status: ${status}`, order.email, sent ? "Success" : "Failed");
         }
       }
 
       // Send a payment-confirmed email if payment was just marked Paid
-      if (payment_status === "Paid" && RESEND_KEY && order?.email) {
+      if (payment_status === "Paid" && BREVO_KEY && order?.email) {
         const sent = await sendEmail(
-          RESEND_KEY,
+          BREVO_KEY,
           order.email,
           `Payment received for order ${order.order_number}`,
           `<p>Hi ${order.client_name},</p><p>We've received your payment for order #${order.order_number}. Thank you!</p><p>— Going Beyond</p>`

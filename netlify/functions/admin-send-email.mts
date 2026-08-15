@@ -1,7 +1,6 @@
 import type { Context, Config } from "@netlify/functions";
 import { verifySession, getBearerToken } from "../lib/verify-session.mts";
-
-const FROM_EMAIL = "Going Beyond <onboarding@resend.dev>";
+import { sendEmail } from "../lib/send-email.mts";
 
 export default async (req: Request, context: Context) => {
   if (req.method !== "POST") {
@@ -11,12 +10,12 @@ export default async (req: Request, context: Context) => {
   const SUPABASE_URL = Netlify.env.get("SUPABASE_URL");
   const SERVICE_KEY = Netlify.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const SESSION_SECRET = Netlify.env.get("ADMIN_SESSION_SECRET");
-  const RESEND_KEY = Netlify.env.get("RESEND_API_KEY");
+  const BREVO_KEY = Netlify.env.get("BREVO_API_KEY");
 
   if (!SUPABASE_URL || !SERVICE_KEY || !SESSION_SECRET) {
     return new Response(JSON.stringify({ error: "Server not configured" }), { status: 500 });
   }
-  if (!RESEND_KEY) {
+  if (!BREVO_KEY) {
     return new Response(JSON.stringify({ error: "Email is not configured" }), { status: 500 });
   }
 
@@ -45,18 +44,7 @@ export default async (req: Request, context: Context) => {
 
     const html = `<p>Hi ${order.client_name},</p><p>${message.replace(/\n/g, "<br>")}</p><p>— Going Beyond</p>`;
 
-    const emailRes = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: order.email,
-        subject: `Update on your order ${order.order_number}`,
-        html,
-      }),
-    });
-
-    const sent = emailRes.ok;
+    const sent = await sendEmail(BREVO_KEY, order.email, `Update on your order ${order.order_number}`, html);
 
     await fetch(`${SUPABASE_URL}/rest/v1/email_log`, {
       method: "POST",

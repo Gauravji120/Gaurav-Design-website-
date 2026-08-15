@@ -1,7 +1,7 @@
 import type { Context, Config } from "@netlify/functions";
+import { sendEmail } from "../lib/send-email.mts";
 
 const OWNER_EMAIL = "gauravadhikari9289@gmail.com";
-const FROM_EMAIL = "Going Beyond <onboarding@resend.dev>";
 
 function isValidPhone(phone: string): boolean {
   const cleaned = phone.trim().replace(/^\+91[\s-]?/, "");
@@ -10,22 +10,6 @@ function isValidPhone(phone: string): boolean {
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-}
-
-async function sendEmail(resendKey: string, to: string, subject: string, html: string) {
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${resendKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ from: FROM_EMAIL, to, subject, html }),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
 }
 
 async function logEmail(
@@ -58,7 +42,7 @@ export default async (req: Request, context: Context) => {
 
   const SUPABASE_URL = Netlify.env.get("SUPABASE_URL");
   const SERVICE_KEY = Netlify.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const RESEND_KEY = Netlify.env.get("RESEND_API_KEY");
+  const BREVO_KEY = Netlify.env.get("BREVO_API_KEY");
 
   if (!SUPABASE_URL || !SERVICE_KEY) {
     return new Response(JSON.stringify({ error: "Server not configured" }), { status: 500 });
@@ -285,8 +269,8 @@ export default async (req: Request, context: Context) => {
       }
     }
 
-    // 3. Send emails via Resend (best-effort — order is already saved either way)
-    if (RESEND_KEY) {
+    // 3. Send emails via Brevo (best-effort — order is already saved either way)
+    if (BREVO_KEY) {
       const clientHtml = `
         <p>Hi ${name},</p>
         <p>Thank you for your order! Here are the details:</p>
@@ -314,7 +298,7 @@ export default async (req: Request, context: Context) => {
       `;
 
       const clientSent = await sendEmail(
-        RESEND_KEY,
+        BREVO_KEY,
         email,
         `Your order ${orderNumber} has been received — Going Beyond`,
         clientHtml
@@ -322,7 +306,7 @@ export default async (req: Request, context: Context) => {
       await logEmail(SUPABASE_URL, SERVICE_KEY, orderId, "Order Received", email, clientSent ? "Success" : "Failed");
 
       const ownerSent = await sendEmail(
-        RESEND_KEY,
+        BREVO_KEY,
         OWNER_EMAIL,
         `New order — ${name} — ${service}`,
         ownerHtml
