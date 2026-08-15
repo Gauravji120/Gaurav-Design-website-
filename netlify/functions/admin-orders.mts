@@ -98,14 +98,15 @@ export default async (req: Request, context: Context) => {
   if (req.method === "PATCH") {
     try {
       const body = await req.json();
-      const { id, status, payment_status } = body;
+      const { id, status, payment_status, clear_revision } = body;
       if (!id) {
         return new Response(JSON.stringify({ error: "Missing order id" }), { status: 400 });
       }
 
-      const update: Record<string, string> = {};
+      const update: Record<string, any> = {};
       if (status) update.status = status;
       if (payment_status) update.payment_status = payment_status;
+      if (clear_revision) update.revision_requested = false;
       if (Object.keys(update).length === 0) {
         return new Response(JSON.stringify({ error: "Nothing to update" }), { status: 400 });
       }

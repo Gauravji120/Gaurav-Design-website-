@@ -270,6 +270,19 @@
 
     document.getElementById('authCheckBox').style.display = 'none';
     document.getElementById('formWrap').style.display = 'block';
+
+    // If the client clicked "Reorder" on My Account, prefill this form from that order
+    const reorderRaw = sessionStorage.getItem('gb_reorder');
+    if (reorderRaw) {
+      try {
+        const r = JSON.parse(reorderRaw);
+        if (r.service) document.querySelector('select[name="service"]').value = r.service;
+        if (r.size) document.querySelector('input[name="size"]').value = r.size;
+        if (r.quantity) document.querySelector('select[name="quantity"]').value = String(r.quantity);
+        if (r.details) document.querySelector('textarea[name="details"]').value = r.details;
+      } catch {}
+      sessionStorage.removeItem('gb_reorder');
+    }
   })();
 
   const toggle = document.getElementById('themeToggle');

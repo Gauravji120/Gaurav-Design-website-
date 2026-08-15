@@ -108,6 +108,24 @@
   .empty-state a{color:var(--carbon-red); font-weight:700;}
 
   .loading{text-align:center; padding:30px; color:var(--ink-soft); font-family:var(--mono); font-size:.82rem;}
+
+  .order-card{border:1px solid var(--line); padding:16px; margin-bottom:12px; background:var(--paper);}
+  .order-card-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .order-num{font-size:.78rem; font-weight:700; color:var(--carbon-red);}
+  .order-service{font-size:.92rem; font-weight:600; margin-top:2px;}
+  .order-total{font-size:1rem; font-weight:700; white-space:nowrap;}
+  .order-card-pills{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px;}
+  .revision-note{font-size:.8rem; color:var(--ink-soft); font-style:italic; margin-top:8px; padding:8px 10px; background:var(--paper-alt); border-left:3px solid var(--stamp-mustard);}
+  .order-card-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .action-btn{font-family:var(--mono); font-size:.74rem; font-weight:700; padding:8px 12px; border:1px solid var(--line); background:var(--white); color:var(--ink-soft); border-radius:2px; cursor:pointer;}
+  .action-btn-primary{background:var(--ledger-green); color:#fff; border-color:var(--ledger-green);}
+  .pill-note{font-family:var(--mono); font-size:.72rem; color:var(--stamp-mustard); padding:8px 4px;}
+
+  .modal-overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:center; justify-content:center; padding:20px;}
+  .modal-box{background:var(--white); border:1px solid var(--line); padding:24px; max-width:420px; width:100%;}
+  .modal-box h3{font-size:1.05rem; font-weight:700; margin-bottom:4px;}
+  textarea{width:100%; padding:10px 12px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:.9rem; border-radius:2px; resize:vertical;}
+  textarea:focus{outline:2px solid var(--carbon-red); outline-offset:1px;}
   footer{padding:32px 24px; text-align:center; border-top:1px solid var(--line);}
   footer p{color:var(--ink-soft); font-size:.8rem;}
 </style>
@@ -238,6 +256,25 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="revisionModal">
+  <div class="modal-box">
+    <h3>Request a Revision</h3>
+    <p class="muted-small" style="margin-bottom:14px;">Order <span id="revisionOrderLabel" class="mono"></span></p>
+    <form id="revisionForm">
+      <input type="hidden" id="revisionOrderId">
+      <div class="field">
+        <label>What needs to change?</label>
+        <textarea id="revisionNotes" rows="4" required placeholder="Describe what you'd like changed…"></textarea>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button type="submit" class="btn" id="revisionSubmitBtn">Send Request</button>
+        <button type="button" class="btn btn-outline" id="revisionCancelBtn">Cancel</button>
+      </div>
+      <div class="msg-box" id="revisionMsg"></div>
+    </form>
+  </div>
+</div>
+
 <footer><p>&copy; Going Beyond</p></footer>
 
 <script>
@@ -304,30 +341,93 @@
         return;
       }
 
-      const rows = result.orders.map(o => `
-        <tr>
-          <td class="mono">${o.order_number}</td>
-          <td>${o.service}</td>
-          <td>${o.quantity}</td>
-          <td>₹${o.total_price}</td>
-          <td><span class="status-pill ${o.status === 'Order Delivered' ? 'status-Delivered' : 'status-default'}">${o.status}</span></td>
-          <td><span class="status-pill ${o.payment_status === 'Paid' ? 'status-Paid' : 'status-default'}">${o.payment_status}</span></td>
-          <td>${fmtDate(o.created_at)}</td>
-        </tr>
-      `).join('');
+      const cards = result.orders.map(o => {
+        const revisionBtn = o.revision_requested
+          ? `<span class="pill-note">🔄 Revision requested</span>`
+          : `<button type="button" class="action-btn" onclick="openRevision('${o.id}','${o.order_number}')">Request Revision</button>`;
 
-      area.innerHTML = `
-        <div class="table-scroll">
-          <table>
-            <thead><tr><th>Order ID</th><th>Service</th><th>Qty</th><th>Total</th><th>Status</th><th>Payment</th><th>Placed On</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
+        const downloadBtn = o.delivery_signed_url
+          ? `<a href="${o.delivery_signed_url}" target="_blank" class="action-btn action-btn-primary">⬇ Download Files</a>`
+          : '';
+
+        const reorderData = encodeURIComponent(JSON.stringify({ service: o.service, size: o.size, quantity: o.quantity, details: o.details || '' }));
+
+        return `
+        <div class="order-card">
+          <div class="order-card-top">
+            <div>
+              <span class="mono order-num">${o.order_number}</span>
+              <div class="order-service">${o.service}${o.size ? ' · ' + o.size : ''}${o.quantity > 1 ? ' · Qty ' + o.quantity : ''}</div>
+            </div>
+            <div class="order-total">₹${o.total_price}</div>
+          </div>
+          <div class="order-card-pills">
+            <span class="status-pill ${o.status === 'Order Delivered' ? 'status-Delivered' : 'status-default'}">${o.status}</span>
+            <span class="status-pill ${o.payment_status === 'Paid' ? 'status-Paid' : 'status-default'}">${o.payment_status}</span>
+            <span class="mono muted-small">${fmtDate(o.created_at)}</span>
+          </div>
+          ${o.revision_requested && o.revision_notes ? `<div class="revision-note">"${o.revision_notes}"</div>` : ''}
+          <div class="order-card-actions">
+            ${downloadBtn}
+            ${revisionBtn}
+            <button type="button" class="action-btn" onclick='reorderThis(${reorderData})'>↻ Reorder</button>
+          </div>
         </div>`;
+      }).join('');
+
+      area.innerHTML = cards;
     } catch (err) {
       document.getElementById('ordersArea').innerHTML = `<div class="empty-state">Could not load your orders right now. Please refresh the page.</div>`;
     }
   }
   init();
+
+  // ---- Reorder: stash the order's details and jump to the Order page ----
+  function reorderThis(data){
+    sessionStorage.setItem('gb_reorder', JSON.stringify(data));
+    window.location.href = 'order.html';
+  }
+
+  // ---- Request Revision modal ----
+  function openRevision(orderId, orderNumber){
+    document.getElementById('revisionOrderId').value = orderId;
+    document.getElementById('revisionOrderLabel').textContent = orderNumber;
+    document.getElementById('revisionNotes').value = '';
+    document.getElementById('revisionMsg').className = 'msg-box';
+    document.getElementById('revisionModal').style.display = 'flex';
+  }
+  document.getElementById('revisionCancelBtn').addEventListener('click', () => {
+    document.getElementById('revisionModal').style.display = 'none';
+  });
+  document.getElementById('revisionForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('revisionSubmitBtn');
+    const msg = document.getElementById('revisionMsg');
+    btn.disabled = true; btn.textContent = 'Sending…'; msg.className = 'msg-box';
+
+    const { data } = await sb.auth.getSession();
+    const res = await fetch('/api/request-revision', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session.access_token}` },
+      body: JSON.stringify({
+        orderId: document.getElementById('revisionOrderId').value,
+        notes: document.getElementById('revisionNotes').value.trim(),
+      }),
+    });
+    const result = await res.json();
+    btn.disabled = false; btn.textContent = 'Send Request';
+
+    if (!res.ok) {
+      msg.textContent = result.error || 'Something went wrong.'; msg.className = 'msg-box error';
+      return;
+    }
+
+    msg.textContent = 'Revision request sent!'; msg.className = 'msg-box success';
+    setTimeout(() => {
+      document.getElementById('revisionModal').style.display = 'none';
+      init();
+    }, 900);
+  });
 
   const profileView = document.getElementById('profileView');
   const profileForm = document.getElementById('profileForm');

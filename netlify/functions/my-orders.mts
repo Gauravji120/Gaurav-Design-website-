@@ -50,7 +50,7 @@ export default async (req: Request, context: Context) => {
     const query = new URLSearchParams({
       user_id: `eq.${userId}`,
       select:
-        "order_number,service,size,deadline,status,payment_status,quantity,total_price,created_at,delivery_method",
+        "id,order_number,service,size,details,deadline,status,payment_status,quantity,total_price,created_at,delivery_method,revision_requested,revision_notes,delivery_file_path",
       order: "created_at.desc",
     });
 
@@ -69,6 +69,36 @@ export default async (req: Request, context: Context) => {
     }
 
     const orders = await ordersRes.json();
+
+    // For any order with a delivered file, generate a short-lived signed URL
+    // so the client can download it. Valid for 1 hour.
+    await Promise.all(
+      orders.map(async (order: any) => {
+        if (order.delivery_file_path) {
+          try {
+            const signRes = await fetch(
+              `${SUPABASE_URL}/storage/v1/object/sign/deliverables/${order.delivery_file_path}`,
+              {
+                method: "POST",
+                headers: {
+                  apikey: SERVICE_KEY,
+                  Authorization: `Bearer ${SERVICE_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ expiresIn: 3600 }),
+              }
+            );
+            if (signRes.ok) {
+              const { signedURL } = await signRes.json();
+              order.delivery_signed_url = `${SUPABASE_URL}/storage/v1${signedURL}`;
+            }
+          } catch {
+            // If signing fails, the client just won't see a download link for this one order
+          }
+        }
+      })
+    );
+
     return new Response(JSON.stringify({ success: true, orders }), {
       status: 200,
       headers: { "Content-Type": "application/json" },

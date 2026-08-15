@@ -73,6 +73,7 @@
   .order-top{display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:10px;}
   .order-top .oid{font-family:var(--mono); font-weight:700;}
   .order-meta{font-size:.82rem; color:var(--ink-soft); margin-bottom:12px;}
+  .revision-alert{background:var(--paper-alt); border-left:3px solid var(--stamp-mustard); padding:8px 12px; font-size:.8rem; margin-bottom:12px;}
   .order-controls{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
   .badge{font-family:var(--mono); font-size:.68rem; font-weight:700; padding:3px 9px; border-radius:12px;}
   .badge.paid{background:rgba(76,107,84,.15); color:var(--ledger-green);}
@@ -384,11 +385,21 @@
           ${order.details ? order.details.slice(0,140) + (order.details.length>140?'…':'') : ''}
           ${order.reference_file_signed_url ? `<br>📎 <a href="${order.reference_file_signed_url}" target="_blank" style="color:var(--carbon-red); font-weight:700; text-decoration:underline;">View reference file</a>` : (order.reference_file_url ? '<br>📎 Reference file uploaded (link expired — refresh page)' : '')}
           ${order.coupon_code ? `<br>🎟 Coupon: ${order.coupon_code} (${order.discount_percent}% off)` : ''}
+          ${order.delivery_file_path ? `<br>✅ Delivery file uploaded` : ''}
         </div>
+        ${order.revision_requested ? `
+        <div class="revision-alert">
+          🔄 <strong>Revision requested:</strong> ${order.revision_notes || '(no details given)'}
+          <button class="btn btn-sm btn-ghost clearRevisionBtn" data-id="${order.id}" style="margin-left:8px;">Mark handled</button>
+        </div>` : ''}
         <div class="order-controls">
           <select class="statusSelect" data-id="${order.id}">${statusOptions}</select>
           <button class="btn btn-sm btn-green markPaidBtn" data-id="${order.id}" ${order.payment_status==='Paid'?'disabled':''}>Mark Paid</button>
           <button class="btn btn-sm btn-ghost emailBtn" data-id="${order.id}">Send custom email</button>
+          <label class="btn btn-sm btn-ghost" style="cursor:pointer;">
+            📤 Upload delivery
+            <input type="file" class="deliveryFileInput" data-id="${order.id}" style="display:none;">
+          </label>
         </div>
         <div class="email-box" id="emailBox-${order.id}">
           <textarea placeholder="Type your message to the client…" id="emailMsg-${order.id}"></textarea>
@@ -396,6 +407,47 @@
         </div>
       `;
       list.appendChild(row);
+    });
+
+    list.querySelectorAll('.clearRevisionBtn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        btn.disabled = true; btn.textContent = 'Saving…';
+        try {
+          await apiFetch('/api/admin-orders', {
+            method: 'PATCH',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ id, clear_revision: true })
+          });
+          loadOrders(document.getElementById('orderSearch').value.trim());
+        } catch(e) {}
+      });
+    });
+
+    list.querySelectorAll('.deliveryFileInput').forEach(input => {
+      input.addEventListener('change', async () => {
+        if (!input.files.length) return;
+        const id = input.dataset.id;
+        const label = input.closest('label');
+        const originalText = label.firstChild.textContent;
+        label.firstChild.textContent = ' Uploading…';
+        try {
+          const fd = new FormData();
+          fd.append('orderId', id);
+          fd.append('file', input.files[0]);
+          const res = await apiFetch('/api/admin-upload-delivery', {
+            method: 'POST',
+            headers: authHeaders({}),
+            body: fd
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Upload failed');
+          label.firstChild.textContent = ' ✅ Uploaded';
+          loadOrders(document.getElementById('orderSearch').value.trim());
+        } catch(e) {
+          label.firstChild.textContent = ' ❌ Failed — retry';
+        }
+      });
     });
 
     list.querySelectorAll('.statusSelect').forEach(sel => {
