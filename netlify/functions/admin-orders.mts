@@ -84,7 +84,7 @@ export default async (req: Request, context: Context) => {
   if (req.method === "PATCH") {
     try {
       const body = await req.json();
-      const { id, status, payment_status, clear_revision } = body;
+      const { id, status, payment_status, clear_revision, send_review_request } = body;
       if (!id) {
         return new Response(JSON.stringify({ error: "Missing order id" }), { status: 400 });
       }
@@ -93,26 +93,33 @@ export default async (req: Request, context: Context) => {
       if (status) update.status = status;
       if (payment_status) update.payment_status = payment_status;
       if (clear_revision) update.revision_requested = false;
-      if (Object.keys(update).length === 0) {
+      if (Object.keys(update).length === 0 && !send_review_request) {
         return new Response(JSON.stringify({ error: "Nothing to update" }), { status: 400 });
       }
 
-      const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${id}`, {
-        method: "PATCH",
-        headers: {
-          apikey: SERVICE_KEY,
-          Authorization: `Bearer ${SERVICE_KEY}`,
-          "Content-Type": "application/json",
-          Prefer: "return=representation",
-        },
-        body: JSON.stringify(update),
-      });
+      let order: any;
+      if (Object.keys(update).length > 0) {
+        const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${id}`, {
+          method: "PATCH",
+          headers: {
+            apikey: SERVICE_KEY,
+            Authorization: `Bearer ${SERVICE_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "return=representation",
+          },
+          body: JSON.stringify(update),
+        });
 
-      if (!patchRes.ok) {
-        return new Response(JSON.stringify({ error: "Could not update order" }), { status: 500 });
+        if (!patchRes.ok) {
+          return new Response(JSON.stringify({ error: "Could not update order" }), { status: 500 });
+        }
+        [order] = await patchRes.json();
+      } else {
+        const getRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${id}&select=*`, {
+          headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` },
+        });
+        [order] = await getRes.json();
       }
-
-      const [order] = await patchRes.json();
 
       // Send a status-change email to the client, if this update included a status change
       if (status && BREVO_KEY && order?.email) {
@@ -150,6 +157,29 @@ export default async (req: Request, context: Context) => {
           `<p>Hi ${order.client_name},</p><p>We've received your payment for order #${order.order_number}. Thank you!</p><p>— Going Beyond</p>`
         );
         await logEmail(SUPABASE_URL, SERVICE_KEY, order.id, "Payment Confirmed", order.email, sent ? "Success" : "Failed");
+      }
+
+      // Notify the client that their revision request has been handled
+      if (clear_revision && BREVO_KEY && order?.email) {
+        const sent = await sendEmail(
+          BREVO_KEY,
+          order.email,
+          `Your revision on order ${order.order_number} is done`,
+          `<p>Hi ${order.client_name},</p><p>The revision you requested on order <strong>${order.order_number}</strong> has been taken care of. Please check your order in <a href="https://goingbeyond.netlify.app/account.html">My Account</a>.</p><p>If anything still needs adjusting, just let us know.</p><p>— Going Beyond</p>`
+        );
+        await logEmail(SUPABASE_URL, SERVICE_KEY, order.id, "Revision Handled", order.email, sent ? "Success" : "Failed");
+      }
+
+      // Manually-triggered review/testimonial request (admin sends this whenever they choose,
+      // typically a few days after delivery)
+      if (send_review_request && BREVO_KEY && order?.email) {
+        const sent = await sendEmail(
+          BREVO_KEY,
+          order.email,
+          `How was your experience with order ${order.order_number}?`,
+          `<p>Hi ${order.client_name},</p><p>Hope you're loving your final design from order <strong>${order.order_number}</strong>!</p><p>If you have a minute, a quick review or a referral to a friend would mean a lot for a small business like this one. You can just reply to this email, or message on <a href="https://wa.me/918368125261" target="_blank">WhatsApp</a> with your feedback.</p><p>Thank you for choosing Going Beyond!</p><p>— Going Beyond</p>`
+        );
+        await logEmail(SUPABASE_URL, SERVICE_KEY, order.id, "Review Request", order.email, sent ? "Success" : "Failed");
       }
 
       return new Response(JSON.stringify({ success: true, order }), {

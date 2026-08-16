@@ -400,6 +400,7 @@
             📤 Upload delivery
             <input type="file" class="deliveryFileInput" data-id="${order.id}" style="display:none;">
           </label>
+          ${order.status === 'Order Delivered' ? `<button class="btn btn-sm btn-ghost reviewRequestBtn" data-id="${order.id}">📝 Send review request</button>` : ''}
         </div>
         <div class="email-box" id="emailBox-${order.id}">
           <textarea placeholder="Type your message to the client…" id="emailMsg-${order.id}"></textarea>
@@ -482,6 +483,25 @@
         } catch(e) {
           btn.disabled = false;
           btn.textContent = 'Mark Paid';
+        }
+      });
+    });
+
+    list.querySelectorAll('.reviewRequestBtn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
+        try {
+          await apiFetch('/api/admin-orders', {
+            method: 'PATCH',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ id, send_review_request: true })
+          });
+          btn.textContent = '✅ Sent';
+        } catch(e) {
+          btn.disabled = false;
+          btn.textContent = '📝 Send review request';
         }
       });
     });
