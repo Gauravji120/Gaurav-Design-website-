@@ -160,6 +160,12 @@
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzdWprbW13d2tuanJhb2ZjaXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNDQ4NzksImV4cCI6MjA5ODgyMDg3OX0.t8WpzFmQpE2kJj5w0XuVZV5QeeAcYCpJZspgqnJjNFU";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+  // ---- Capture a referral code from the URL, if present, before it's lost ----
+  const refParam = new URLSearchParams(window.location.search).get('ref');
+  if (refParam && /^GB-[A-Z0-9]{8}$/.test(refParam)) {
+    localStorage.setItem('gb_pending_ref', refParam);
+  }
+
   // ---- Where to send the user after login (defaults to My Account) ----
   const nextParam = new URLSearchParams(window.location.search).get('next');
   const nextPage = (nextParam && /^[a-zA-Z0-9_-]+\.html$/.test(nextParam)) ? nextParam : 'account.html';

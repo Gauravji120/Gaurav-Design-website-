@@ -179,6 +179,15 @@
       <span class="amt" id="discountedAmt" style="color:var(--ledger-green);">₹0</span>
     </div>
 
+    <div class="field" id="loyaltyField" style="display:none;">
+      <label>Loyalty Points <span style="text-transform:none; font-weight:500;">(optional)</span></label>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="number" name="points_redeemed" id="pointsInput" min="0" value="0" style="width:100px;">
+        <span class="muted-small" id="pointsBalanceLabel" style="font-size:.78rem; color:var(--ink-soft);"></span>
+      </div>
+      <span class="field-error" id="pointsError"></span>
+    </div>
+
     <div class="form-row">
       <div class="field">
         <label>Size / platform</label>
@@ -270,6 +279,25 @@
 
     document.getElementById('authCheckBox').style.display = 'none';
     document.getElementById('formWrap').style.display = 'block';
+
+    // Loyalty points balance — fetch once, show the redeem field if they have any
+    try {
+      const ptRes = await fetch('/api/loyalty-points', { headers: { Authorization: `Bearer ${currentSession.access_token}` } });
+      const ptResult = await ptRes.json();
+      if (ptRes.ok && ptResult.success && ptResult.balance > 0) {
+        window.gbPointsBalance = ptResult.balance;
+        document.getElementById('loyaltyField').style.display = 'block';
+        document.getElementById('pointsBalanceLabel').textContent = `You have ${ptResult.balance} points (₹${ptResult.balance} available)`;
+        document.getElementById('pointsInput').setAttribute('max', ptResult.balance);
+      }
+    } catch {}
+
+    document.getElementById('pointsInput').addEventListener('input', function(){
+      const max = window.gbPointsBalance || 0;
+      if (Number(this.value) > max) this.value = max;
+      if (Number(this.value) < 0) this.value = 0;
+      document.getElementById('pointsError').textContent = '';
+    });
 
     // If the client clicked "Reorder" on My Account, prefill this form from that order
     const reorderRaw = sessionStorage.getItem('gb_reorder');

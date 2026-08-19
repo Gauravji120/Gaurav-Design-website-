@@ -66,7 +66,7 @@ export default async (req: Request, context: Context) => {
         Authorization: `Bearer ${SERVICE_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ revision_requested: true, revision_notes: notes }),
+      body: JSON.stringify({ revision_requested: true, revision_notes: notes, revision_requested_at: new Date().toISOString() }),
     });
 
     if (!patchRes.ok) {

@@ -78,7 +78,7 @@ export default async (req: Request, context: Context) => {
         BREVO_KEY,
         order.email,
         `Your files are ready — ${order.order_number}`,
-        `<p>Hi ${order.client_name},</p><p>Your final files for order <strong>${order.order_number}</strong> are ready! Log in to <a href="https://goingbeyond.netlify.app/account.html">My Account</a> to download them.</p><p>— Going Beyond</p>`
+        `<p>Hi ${order.client_name},</p><p>Your final files for order <strong>${order.order_number}</strong> are ready! Log in to <a href="https://goingbeyond.netlify.app/orders.html">My Orders</a> to download them.</p><p>— Going Beyond</p>`
       );
     }
 

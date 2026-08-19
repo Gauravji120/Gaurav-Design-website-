@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>document.documentElement.classList.add('js');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Call — Going Beyond</title>
+<meta name="description" content="Request a call to discuss your Going Beyond order.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{
+    --paper:#EFEDE2; --paper-alt:#E6E2D3; --ink:#1F2A38; --ink-soft:#4A5563;
+    --carbon-red:#B23A2E; --stamp-mustard:#C9922A; --ledger-green:#4C6B54;
+    --line:#C9C4B2; --white:#FFFDF8; --mono:'JetBrains Mono', monospace; --sans:'Work Sans', sans-serif;
+  }
+  [data-theme="dark"]{
+    --paper:#171A1E; --paper-alt:#1E2228; --ink:#ECE8DC; --ink-soft:#A9A79B;
+    --carbon-red:#E0574A; --stamp-mustard:#E0AC4D; --ledger-green:#7FA98C;
+    --line:#3A3E44; --white:#20242A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.5;}
+  a{color:inherit; text-decoration:none;}
+  header.nav{position:sticky; top:0; z-index:50; background:var(--white); border-bottom:1px solid var(--line);}
+  .nav-inner{display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:900px; margin:0 auto;}
+  .back-link{font-family:var(--mono); font-size:.82rem; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:6px;}
+  .brand{font-weight:700; font-size:.95rem;}
+  .icon-btn{width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:var(--paper); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:.95rem;}
+  .page-head{padding:32px 24px 20px; text-align:center;}
+  .page-head .eyebrow{font-family:var(--mono); font-size:.7rem; color:var(--carbon-red); font-weight:700; letter-spacing:.08em; margin-bottom:10px;}
+  .page-head h1{font-size:1.4rem; font-weight:700;}
+  .wrap{max-width:600px; margin:0 auto; padding:0 24px 60px;}
+  .card{background:var(--white); border:1px solid var(--line); padding:26px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:.72rem; font-weight:700; margin-bottom:6px; font-family:var(--mono); color:var(--ink-soft);}
+  input, textarea{width:100%; padding:11px 12px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:.9rem; border-radius:2px;}
+  textarea{resize:vertical;}
+  input:focus, textarea:focus{outline:2px solid var(--carbon-red); outline-offset:1px;}
+  .btn{padding:13px 24px; border-radius:2px; font-weight:700; font-size:.88rem; border:none; cursor:pointer; background:var(--carbon-red); color:#fff; width:100%;}
+  .btn:disabled{opacity:.6; cursor:not-allowed;}
+  .msg-box{display:none; font-size:.8rem; padding:10px 12px; margin-top:12px; border-left:4px solid; font-family:var(--mono);}
+  .msg-box.error{display:block; background:var(--paper-alt); border-color:var(--carbon-red); color:var(--carbon-red);}
+  .msg-box.success{display:block; background:var(--paper-alt); border-color:var(--ledger-green); color:var(--ledger-green);}
+  .loading{text-align:center; padding:60px 20px; color:var(--ink-soft); font-family:var(--mono); font-size:.85rem;}
+  footer{padding:32px 24px; text-align:center; border-top:1px solid var(--line);}
+  footer p{color:var(--ink-soft); font-size:.8rem;}
+</style>
+</head>
+<body data-theme="light">
+<header class="nav">
+  <div class="nav-inner">
+    <a href="account.html" class="back-link">← My Account</a>
+    <div class="brand">GOING BEYOND</div>
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
+  </div>
+</header>
+<div class="page-head">
+  <div class="eyebrow">CLIENT ACCOUNT</div>
+  <h1>Book a Call</h1>
+</div>
+<div id="loadingBox" class="loading">Loading…</div>
+<div class="wrap" id="callContent" style="display:none;">
+  <div class="card">
+    <form id="callForm">
+      <div class="field">
+        <label>Preferred Time <span style="font-weight:400;">(optional)</span></label>
+        <input type="text" id="preferredTime" placeholder="e.g. weekday evenings, or a specific date/time">
+      </div>
+      <div class="field">
+        <label>What would you like to discuss?</label>
+        <textarea id="reason" rows="4" required placeholder="e.g. discussing details for a new packaging order"></textarea>
+      </div>
+      <button type="submit" class="btn" id="callSubmitBtn">Send Request</button>
+      <div class="msg-box" id="callMsg"></div>
+    </form>
+  </div>
+</div>
+<footer><p>&copy; Going Beyond</p></footer>
+<script>
+  const SUPABASE_URL = "https://ysujkmmwwknjraofcixr.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzdWprbW13d2tuanJhb2ZjaXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNDQ4NzksImV4cCI6MjA5ODgyMDg3OX0.t8WpzFmQpE2kJj5w0XuVZV5QeeAcYCpJZspgqnJjNFU";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function init(){
+    const { data } = await sb.auth.getSession();
+    if (!data.session) { window.location.href = 'login.html?next=call.html'; return; }
+    document.getElementById('loadingBox').style.display = 'none';
+    document.getElementById('callContent').style.display = 'block';
+  }
+  init();
+
+  document.getElementById('callForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('callSubmitBtn');
+    const msg = document.getElementById('callMsg');
+    btn.disabled = true; btn.textContent = 'Sending…'; msg.className = 'msg-box';
+
+    const { data } = await sb.auth.getSession();
+    const res = await fetch('/api/book-call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session.access_token}` },
+      body: JSON.stringify({
+        preferredTime: document.getElementById('preferredTime').value.trim(),
+        reason: document.getElementById('reason').value.trim(),
+      })
+    });
+    const result = await res.json();
+    btn.disabled = false; btn.textContent = 'Send Request';
+
+    if (!res.ok) {
+      msg.textContent = result.error || 'Something went wrong.'; msg.className = 'msg-box error';
+      return;
+    }
+    msg.textContent = 'Request sent! We\'ll reach out soon to confirm a time.'; msg.className = 'msg-box success';
+    document.getElementById('callForm').reset();
+  });
+
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('gb_theme');
+  if (savedTheme) { document.body.setAttribute('data-theme', savedTheme); themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙'; }
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    const next = isDark ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', next);
+    themeToggle.textContent = isDark ? '🌙' : '☀️';
+    localStorage.setItem('gb_theme', next);
+  });
+</script>
+</body>
+</html>

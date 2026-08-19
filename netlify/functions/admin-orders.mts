@@ -1,6 +1,7 @@
 import type { Context, Config } from "@netlify/functions";
 import { verifySession, getBearerToken } from "../lib/verify-session.mts";
 import { sendEmail } from "../lib/send-email.mts";
+import { getNotificationPref, shouldSendEmail } from "../lib/notification-pref.mts";
 
 async function logEmail(supabaseUrl: string, serviceKey: string, orderId: string, emailType: string, sentTo: string, status: "Success" | "Failed") {
   try {
@@ -121,6 +122,11 @@ export default async (req: Request, context: Context) => {
         [order] = await getRes.json();
       }
 
+      // Look up the client's notification preference once, before sending anything
+      const notifPref = (BREVO_KEY && order?.email)
+        ? await getNotificationPref(SUPABASE_URL, SERVICE_KEY, order.user_id)
+        : "all";
+
       // Send a status-change email to the client, if this update included a status change
       if (status && BREVO_KEY && order?.email) {
         const templates: Record<string, { subject: string; html: string }> = {
@@ -142,14 +148,15 @@ export default async (req: Request, context: Context) => {
           },
         };
         const tpl = templates[status];
-        if (tpl) {
+        const isHighPriority = status === "Order Delivered";
+        if (tpl && shouldSendEmail(notifPref, isHighPriority)) {
           const sent = await sendEmail(BREVO_KEY, order.email, tpl.subject, tpl.html);
           await logEmail(SUPABASE_URL, SERVICE_KEY, order.id, `Status: ${status}`, order.email, sent ? "Success" : "Failed");
         }
       }
 
       // Send a payment-confirmed email if payment was just marked Paid
-      if (payment_status === "Paid" && BREVO_KEY && order?.email) {
+      if (payment_status === "Paid" && BREVO_KEY && order?.email && shouldSendEmail(notifPref, true)) {
         const sent = await sendEmail(
           BREVO_KEY,
           order.email,
@@ -160,19 +167,19 @@ export default async (req: Request, context: Context) => {
       }
 
       // Notify the client that their revision request has been handled
-      if (clear_revision && BREVO_KEY && order?.email) {
+      if (clear_revision && BREVO_KEY && order?.email && shouldSendEmail(notifPref, true)) {
         const sent = await sendEmail(
           BREVO_KEY,
           order.email,
           `Your revision on order ${order.order_number} is done`,
-          `<p>Hi ${order.client_name},</p><p>The revision you requested on order <strong>${order.order_number}</strong> has been taken care of. Please check your order in <a href="https://goingbeyond.netlify.app/account.html">My Account</a>.</p><p>If anything still needs adjusting, just let us know.</p><p>— Going Beyond</p>`
+          `<p>Hi ${order.client_name},</p><p>The revision you requested on order <strong>${order.order_number}</strong> has been taken care of. Please check your order in <a href="https://goingbeyond.netlify.app/orders.html">My Orders</a>.</p><p>If anything still needs adjusting, just let us know.</p><p>— Going Beyond</p>`
         );
         await logEmail(SUPABASE_URL, SERVICE_KEY, order.id, "Revision Handled", order.email, sent ? "Success" : "Failed");
       }
 
       // Manually-triggered review/testimonial request (admin sends this whenever they choose,
       // typically a few days after delivery)
-      if (send_review_request && BREVO_KEY && order?.email) {
+      if (send_review_request && BREVO_KEY && order?.email && shouldSendEmail(notifPref, true)) {
         const sent = await sendEmail(
           BREVO_KEY,
           order.email,

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>document.documentElement.classList.add('js');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Orders — Going Beyond</title>
+<meta name="description" content="Your order history with Going Beyond.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{
+    --paper:#EFEDE2; --paper-alt:#E6E2D3; --ink:#1F2A38; --ink-soft:#4A5563;
+    --carbon-red:#B23A2E; --stamp-mustard:#C9922A; --ledger-green:#4C6B54;
+    --line:#C9C4B2; --white:#FFFDF8; --mono:'JetBrains Mono', monospace; --sans:'Work Sans', sans-serif;
+  }
+  [data-theme="dark"]{
+    --paper:#171A1E; --paper-alt:#1E2228; --ink:#ECE8DC; --ink-soft:#A9A79B;
+    --carbon-red:#E0574A; --stamp-mustard:#E0AC4D; --ledger-green:#7FA98C;
+    --line:#3A3E44; --white:#20242A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.5;}
+  a{color:inherit; text-decoration:none;}
+  .mono{font-family:var(--mono);}
+
+  header.nav{position:sticky; top:0; z-index:50; background:var(--white); border-bottom:1px solid var(--line);}
+  .nav-inner{display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:900px; margin:0 auto;}
+  .back-link{font-family:var(--mono); font-size:.82rem; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:6px;}
+  .brand{font-weight:700; font-size:.95rem;}
+  .icon-btn{width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:var(--paper); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:.95rem;}
+
+  .page-head{padding:32px 24px 20px; text-align:center;}
+  .page-head .eyebrow{font-family:var(--mono); font-size:.7rem; color:var(--carbon-red); font-weight:700; letter-spacing:.08em; margin-bottom:10px;}
+  .page-head h1{font-size:1.4rem; font-weight:700;}
+
+  .wrap{max-width:700px; margin:0 auto; padding:0 24px 60px;}
+
+  .empty-state{text-align:center; padding:50px 10px; color:var(--ink-soft); font-size:.9rem;}
+  .empty-state a{color:var(--carbon-red); font-weight:700;}
+  .loading{text-align:center; padding:60px 20px; color:var(--ink-soft); font-family:var(--mono); font-size:.85rem;}
+
+  .status-pill{display:inline-block; padding:4px 10px; border-radius:20px; font-size:.72rem; font-weight:700; font-family:var(--mono);}
+  .status-Delivered, .status-Paid{background:rgba(76,107,84,.15); color:var(--ledger-green);}
+  .status-default{background:var(--paper-alt); color:var(--ink-soft);}
+
+  .order-card{border:1px solid var(--line); padding:16px; margin-bottom:12px; background:var(--white);}
+  .order-card-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .order-num{font-size:.78rem; font-weight:700; color:var(--carbon-red);}
+  .order-service{font-size:.92rem; font-weight:600; margin-top:2px;}
+  .order-total{font-size:1rem; font-weight:700; white-space:nowrap;}
+  .order-card-pills{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px;}
+  .muted-small{font-size:.72rem; color:var(--ink-soft); font-weight:400;}
+  .revision-note{font-size:.8rem; color:var(--ink-soft); font-style:italic; margin-top:8px; padding:8px 10px; background:var(--paper-alt); border-left:3px solid var(--stamp-mustard);}
+  .order-card-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .action-btn{font-family:var(--mono); font-size:.74rem; font-weight:700; padding:8px 12px; border:1px solid var(--line); background:var(--white); color:var(--ink-soft); border-radius:2px; cursor:pointer;}
+  .action-btn-primary{background:var(--ledger-green); color:#fff; border-color:var(--ledger-green);}
+  .pill-note{font-family:var(--mono); font-size:.72rem; color:var(--stamp-mustard); padding:8px 4px;}
+
+  .progress-track{display:flex; align-items:center; margin:12px 0 4px;}
+  .progress-step{flex:1; height:4px; background:var(--line); position:relative;}
+  .progress-step.done{background:var(--ledger-green);}
+  .progress-labels{display:flex; justify-content:space-between; font-size:.62rem; font-family:var(--mono); color:var(--ink-soft); margin-bottom:6px;}
+  .progress-labels span.done{color:var(--ledger-green); font-weight:700;}
+  .deadline-tag{font-size:.72rem; font-family:var(--mono); padding:3px 8px; border-radius:20px; background:var(--paper-alt); color:var(--ink-soft);}
+  .deadline-tag.warn{background:rgba(178,58,46,.15); color:var(--carbon-red); font-weight:700;}
+
+  .msg-thread{display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:12px;}
+  .msg-thread.open{display:block;}
+  .msg-list{max-height:200px; overflow-y:auto; margin-bottom:10px;}
+  .msg-bubble{max-width:80%; padding:8px 12px; border-radius:10px; font-size:.82rem; margin-bottom:8px;}
+  .msg-bubble.client{background:var(--carbon-red); color:#fff; margin-left:auto; border-bottom-right-radius:2px;}
+  .msg-bubble.admin{background:var(--paper-alt); margin-right:auto; border-bottom-left-radius:2px;}
+  .msg-time{font-size:.62rem; opacity:.75; margin-top:3px;}
+  .msg-input-row{display:flex; gap:8px;}
+  .msg-input-row input[type="text"]{flex:1;}
+  .msg-input-row button{white-space:nowrap;}
+  .attach-btn{background:var(--paper-alt); border:1px solid var(--line); border-radius:2px; padding:0 10px; cursor:pointer; font-size:1rem;}
+  .msg-attachment-img{max-width:180px; border-radius:6px; display:block; margin-top:6px;}
+  .msg-attachment-file{display:inline-block; margin-top:6px; font-size:.78rem; text-decoration:underline;}
+  .attach-preview{font-size:.72rem; color:var(--ink-soft); margin-bottom:6px; display:none;}
+
+  .modal-overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:center; justify-content:center; padding:20px;}
+  .modal-box{background:var(--white); border:1px solid var(--line); padding:24px; max-width:420px; width:100%;}
+  .modal-box h3{font-size:1.05rem; font-weight:700; margin-bottom:4px;}
+  .field label{display:block; font-size:.72rem; font-weight:700; margin-bottom:6px; font-family:var(--mono); color:var(--ink-soft);}
+  textarea{width:100%; padding:10px 12px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:.9rem; border-radius:2px; resize:vertical;}
+  input{padding:10px 12px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:.9rem; border-radius:2px;}
+  input:focus, textarea:focus{outline:2px solid var(--carbon-red); outline-offset:1px;}
+  textarea:focus{outline:2px solid var(--carbon-red); outline-offset:1px;}
+  .btn{padding:12px 22px; border-radius:2px; font-weight:700; font-size:.86rem; border:none; cursor:pointer; background:var(--carbon-red); color:#fff;}
+  .btn:disabled{opacity:.6; cursor:not-allowed;}
+  .btn-outline{background:none; border:1px solid var(--line); color:var(--ink-soft);}
+  .msg-box{display:none; font-size:.8rem; padding:10px 12px; margin-top:12px; border-left:4px solid; font-family:var(--mono);}
+  .msg-box.error{display:block; background:var(--paper-alt); border-color:var(--carbon-red); color:var(--carbon-red);}
+  .msg-box.success{display:block; background:var(--paper-alt); border-color:var(--ledger-green); color:var(--ledger-green);}
+
+  footer{padding:32px 24px; text-align:center; border-top:1px solid var(--line);}
+  footer p{color:var(--ink-soft); font-size:.8rem;}
+</style>
+</head>
+<body data-theme="light">
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="account.html" class="back-link">← My Account</a>
+    <div class="brand">GOING BEYOND</div>
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
+  </div>
+</header>
+
+<div class="page-head">
+  <div class="eyebrow">CLIENT ACCOUNT</div>
+  <h1>My Orders</h1>
+</div>
+
+<div class="wrap">
+  <div id="ordersArea"><div class="loading">Loading your orders…</div></div>
+</div>
+
+<div class="modal-overlay" id="revisionModal">
+  <div class="modal-box">
+    <h3>Request a Revision</h3>
+    <p class="muted-small" style="margin-bottom:14px;">Order <span id="revisionOrderLabel" class="mono"></span></p>
+    <form id="revisionForm">
+      <input type="hidden" id="revisionOrderId">
+      <div class="field">
+        <label>What needs to change?</label>
+        <textarea id="revisionNotes" rows="4" required placeholder="Describe what you'd like changed…"></textarea>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button type="submit" class="btn" id="revisionSubmitBtn">Send Request</button>
+        <button type="button" class="btn btn-outline" id="revisionCancelBtn">Cancel</button>
+      </div>
+      <div class="msg-box" id="revisionMsg"></div>
+    </form>
+  </div>
+</div>
+
+<footer><p>&copy; Going Beyond</p></footer>
+
+<script>
+  const SUPABASE_URL = "https://ysujkmmwwknjraofcixr.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzdWprbW13d2tuanJhb2ZjaXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNDQ4NzksImV4cCI6MjA5ODgyMDg3OX0.t8WpzFmQpE2kJj5w0XuVZV5QeeAcYCpJZspgqnJjNFU";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function fmtDate(iso){
+    if(!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  }
+
+  async function init(){
+    const { data } = await sb.auth.getSession();
+    const session = data.session;
+    if (!session) { window.location.href = 'login.html?next=orders.html'; return; }
+
+    try {
+      const res = await fetch('/api/my-orders', {
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      const result = await res.json();
+      const area = document.getElementById('ordersArea');
+
+      if (!res.ok || !result.success) {
+        area.innerHTML = `<div class="empty-state">Could not load your orders right now. Please refresh the page.</div>`;
+        return;
+      }
+
+      if (!result.orders.length) {
+        area.innerHTML = `<div class="empty-state">You haven't placed any orders yet.<br><a href="order.html">Place your first order →</a></div>`;
+        return;
+      }
+
+      const cards = result.orders.map(o => {
+        const revisionBtn = o.revision_requested
+          ? `<span class="pill-note">🔄 Revision requested</span>`
+          : `<button type="button" class="action-btn" onclick="openRevision('${o.id}','${o.order_number}')">Request Revision</button>`;
+
+        const downloadBtn = o.delivery_signed_url
+          ? `<a href="${o.delivery_signed_url}" target="_blank" class="action-btn action-btn-primary">⬇ Download Files</a>`
+          : '';
+
+        const reorderData = encodeURIComponent(JSON.stringify({ service: o.service, size: o.size, quantity: o.quantity, details: o.details || '' }));
+
+        // Progress bar — 4 stages
+        const stages = ['Order Confirmed', 'Design in Progress', 'Review', 'Order Delivered'];
+        let currentIdx = stages.indexOf(o.status);
+        if (currentIdx === -1) currentIdx = 0;
+        const progressHtml = `
+          <div class="progress-labels">
+            ${stages.map((s, i) => `<span class="${i <= currentIdx ? 'done' : ''}">${s.replace('Order ', '')}</span>`).join('')}
+          </div>
+          <div class="progress-track">
+            ${stages.map((s, i) => `<div class="progress-step ${i <= currentIdx ? 'done' : ''}"></div>`).join('')}
+          </div>`;
+
+        // Deadline tag
+        let deadlineHtml = '';
+        if (o.deadline && o.status !== 'Order Delivered') {
+          const daysLeft = Math.ceil((new Date(o.deadline) - new Date()) / (1000 * 60 * 60 * 24));
+          const warn = daysLeft <= 2;
+          const text = daysLeft < 0 ? `${Math.abs(daysLeft)}d overdue` : daysLeft === 0 ? 'Due today' : `${daysLeft}d left`;
+          deadlineHtml = `<span class="deadline-tag ${warn ? 'warn' : ''}">⏰ ${text}</span>`;
+        }
+
+        return `
+        <div class="order-card">
+          <div class="order-card-top">
+            <div>
+              <span class="mono order-num">${o.order_number}</span>
+              <div class="order-service">${o.service}${o.size ? ' · ' + o.size : ''}${o.quantity > 1 ? ' · Qty ' + o.quantity : ''}</div>
+            </div>
+            <div class="order-total">₹${o.total_price}</div>
+          </div>
+          ${progressHtml}
+          <div class="order-card-pills">
+            <span class="status-pill ${o.status === 'Order Delivered' ? 'status-Delivered' : 'status-default'}">${o.status}</span>
+            <span class="status-pill ${o.payment_status === 'Paid' ? 'status-Paid' : 'status-default'}">${o.payment_status}</span>
+            ${deadlineHtml}
+            <span class="mono muted-small">${fmtDate(o.created_at)}</span>
+          </div>
+          ${o.revision_requested && o.revision_notes ? `<div class="revision-note">"${o.revision_notes}"</div>` : ''}
+          <div class="order-card-actions">
+            ${downloadBtn}
+            ${revisionBtn}
+            <button type="button" class="action-btn" onclick='reorderThis(${reorderData})'>↻ Reorder</button>
+            <button type="button" class="action-btn" onclick="toggleThread('${o.id}')">💬 Messages</button>
+          </div>
+          <div class="msg-thread" id="thread-${o.id}">
+            <div class="msg-list" id="msgList-${o.id}"><div class="muted-small mono">Loading…</div></div>
+            <div class="attach-preview" id="attachPreview-${o.id}"></div>
+            <div class="msg-input-row">
+              <button type="button" class="attach-btn" onclick="document.getElementById('fileInput-${o.id}').click()">📎</button>
+              <input type="file" id="fileInput-${o.id}" style="display:none;" onchange="showAttachPreview('${o.id}')">
+              <input type="text" id="msgInput-${o.id}" placeholder="Type a message…">
+              <button type="button" class="action-btn action-btn-primary" onclick="sendMsg('${o.id}')">Send</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+
+      area.innerHTML = cards;
+    } catch (err) {
+      document.getElementById('ordersArea').innerHTML = `<div class="empty-state">Could not load your orders right now. Please refresh the page.</div>`;
+    }
+  }
+  init();
+
+  function reorderThis(data){
+    sessionStorage.setItem('gb_reorder', JSON.stringify(data));
+    window.location.href = 'order.html';
+  }
+
+  function fmtTime(iso){
+    return new Date(iso).toLocaleString('en-IN', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+  }
+
+  async function toggleThread(orderId){
+    const thread = document.getElementById(`thread-${orderId}`);
+    const isOpening = !thread.classList.contains('open');
+    thread.classList.toggle('open');
+    if (isOpening) await loadThread(orderId);
+  }
+
+  async function loadThread(orderId){
+    const list = document.getElementById(`msgList-${orderId}`);
+    const { data } = await sb.auth.getSession();
+    try {
+      const res = await fetch(`/api/order-messages?orderId=${orderId}`, {
+        headers: { Authorization: `Bearer ${data.session.access_token}` }
+      });
+      const result = await res.json();
+      if (!res.ok || !result.success) { list.innerHTML = '<div class="muted-small">Could not load messages.</div>'; return; }
+      if (!result.messages.length) { list.innerHTML = '<div class="muted-small">No messages yet — say hello!</div>'; return; }
+      list.innerHTML = result.messages.map(m => {
+        let attachHtml = '';
+        if (m.attachment_url) {
+          const isImg = /\.(jpe?g|png|gif|webp)$/i.test(m.attachment_name || '');
+          attachHtml = isImg
+            ? `<a href="${m.attachment_url}" target="_blank"><img src="${m.attachment_url}" class="msg-attachment-img"></a>`
+            : `<a href="${m.attachment_url}" target="_blank" class="msg-attachment-file">📎 ${m.attachment_name}</a>`;
+        }
+        return `
+        <div class="msg-bubble ${m.sender_type}">
+          ${m.message}
+          ${attachHtml}
+          <div class="msg-time">${fmtTime(m.created_at)}</div>
+        </div>`;
+      }).join('');
+      list.scrollTop = list.scrollHeight;
+    } catch {
+      list.innerHTML = '<div class="muted-small">Could not load messages.</div>';
+    }
+  }
+
+  function showAttachPreview(orderId){
+    const input = document.getElementById(`fileInput-${orderId}`);
+    const preview = document.getElementById(`attachPreview-${orderId}`);
+    if (input.files.length) {
+      preview.style.display = 'block';
+      preview.textContent = `📎 ${input.files[0].name} (tap Send to attach)`;
+    } else {
+      preview.style.display = 'none';
+    }
+  }
+
+  async function sendMsg(orderId){
+    const input = document.getElementById(`msgInput-${orderId}`);
+    const fileInput = document.getElementById(`fileInput-${orderId}`);
+    const message = input.value.trim();
+    const file = fileInput.files[0];
+    if (!message && !file) return;
+    input.disabled = true;
+
+    const { data } = await sb.auth.getSession();
+    try {
+      const fd = new FormData();
+      fd.append('orderId', orderId);
+      fd.append('message', message);
+      if (file) fd.append('file', file);
+
+      const res = await fetch('/api/order-messages', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${data.session.access_token}` },
+        body: fd
+      });
+      if (res.ok) {
+        input.value = '';
+        fileInput.value = '';
+        document.getElementById(`attachPreview-${orderId}`).style.display = 'none';
+        await loadThread(orderId);
+      }
+    } catch {}
+    input.disabled = false;
+  }
+
+  function openRevision(orderId, orderNumber){
+    document.getElementById('revisionOrderId').value = orderId;
+    document.getElementById('revisionOrderLabel').textContent = orderNumber;
+    document.getElementById('revisionNotes').value = '';
+    document.getElementById('revisionMsg').className = 'msg-box';
+    document.getElementById('revisionModal').style.display = 'flex';
+  }
+  document.getElementById('revisionCancelBtn').addEventListener('click', () => {
+    document.getElementById('revisionModal').style.display = 'none';
+  });
+  document.getElementById('revisionForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('revisionSubmitBtn');
+    const msg = document.getElementById('revisionMsg');
+    btn.disabled = true; btn.textContent = 'Sending…'; msg.className = 'msg-box';
+
+    const { data } = await sb.auth.getSession();
+    const res = await fetch('/api/request-revision', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session.access_token}` },
+      body: JSON.stringify({
+        orderId: document.getElementById('revisionOrderId').value,
+        notes: document.getElementById('revisionNotes').value.trim(),
+      }),
+    });
+    const result = await res.json();
+    btn.disabled = false; btn.textContent = 'Send Request';
+
+    if (!res.ok) {
+      msg.textContent = result.error || 'Something went wrong.'; msg.className = 'msg-box error';
+      return;
+    }
+
+    msg.textContent = 'Revision request sent!'; msg.className = 'msg-box success';
+    setTimeout(() => {
+      document.getElementById('revisionModal').style.display = 'none';
+      init();
+    }, 900);
+  });
+
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('gb_theme');
+  if (savedTheme) {
+    document.body.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+  }
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    const next = isDark ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', next);
+    themeToggle.textContent = isDark ? '🌙' : '☀️';
+    localStorage.setItem('gb_theme', next);
+  });
+</script>
+</body>
+</html>

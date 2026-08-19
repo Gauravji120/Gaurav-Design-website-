@@ -5,7 +5,7 @@
 <script>document.documentElement.classList.add('js');</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Account — Going Beyond</title>
-<meta name="description" content="View your profile and order history with Going Beyond.">
+<meta name="description" content="Your Going Beyond client account — profile, orders, and settings.">
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,7 +35,7 @@
   .icon-btn{width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:var(--paper); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:.95rem;}
   .logout-btn{font-family:var(--mono); font-size:.76rem; font-weight:700; color:var(--carbon-red); border:1px solid var(--carbon-red); background:none; padding:8px 12px; border-radius:2px; cursor:pointer;}
 
-  .page-head{padding:36px 24px 20px; text-align:center;}
+  .page-head{padding:40px 24px 8px; text-align:center;}
   .page-head .eyebrow{font-family:var(--mono); font-size:.7rem; color:var(--carbon-red); font-weight:700; letter-spacing:.08em; margin-bottom:10px;}
   .page-head h1{font-size:1.5rem; font-weight:700;}
   .avatar-circle{
@@ -43,89 +43,33 @@
     display:flex; align-items:center; justify-content:center; margin:0 auto 14px;
     font-family:var(--mono); font-size:1.3rem; font-weight:700; letter-spacing:.02em;
   }
-
-  .card-head-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
-  .card-head-row h2{margin-bottom:0;}
-  .muted-small{font-size:.72rem; color:var(--ink-soft); font-weight:400;}
-  .btn-small{padding:8px 16px; margin-top:0; font-size:.76rem;}
-  .btn-outline{background:none; border:1px solid var(--line); color:var(--ink-soft);}
-
-  .view-section{margin-bottom:22px;}
-  .view-section:last-child{margin-bottom:0;}
-  .view-section-title{font-family:var(--mono); font-size:.72rem; font-weight:700; color:var(--carbon-red); text-transform:uppercase; letter-spacing:.06em; margin:18px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--line);}
-  .view-section:first-child .view-section-title{margin-top:0;}
-  .view-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
-  .view-grid-full{grid-template-columns:1fr 1fr;}
-  @media(max-width:560px){.view-grid, .view-grid-full{grid-template-columns:1fr;}}
-  .view-label{display:block; font-size:.72rem; font-family:var(--mono); color:var(--ink-soft); margin-bottom:3px;}
-  .view-value{display:block; font-size:.92rem;}
-
-  .wrap{max-width:900px; margin:0 auto; padding:0 24px 60px;}
-  .card{background:var(--white); border:1px solid var(--line); padding:26px; margin-bottom:24px;}
-  .card h2{font-size:1.05rem; font-weight:700; margin-bottom:16px; font-family:var(--mono);}
-
-  .card-head-row{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px;}
-  .card-head-row h2{margin-bottom:0;}
   .muted-small{font-size:.72rem; color:var(--ink-soft); font-weight:400;}
 
-  .profile-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
-  @media(max-width:560px){.profile-grid{grid-template-columns:1fr;}}
-  .profile-field label{display:block; font-size:.72rem; font-weight:700; margin-bottom:4px; font-family:var(--mono); color:var(--ink-soft);}
-  .profile-field .val{font-size:.94rem; padding:9px 0;}
+  .wrap{max-width:700px; margin:0 auto; padding:0 24px 60px;}
 
-  .field label{display:block; font-size:.72rem; font-weight:700; margin-bottom:6px; font-family:var(--mono); color:var(--ink-soft);}
-  input, select{
-    width:100%; padding:10px 12px; border:1px solid var(--line); background:var(--paper);
-    color:var(--ink); font-family:var(--sans); font-size:.9rem; border-radius:2px;
+  .stats-row{display:flex; gap:12px; margin:24px 0; flex-wrap:wrap;}
+  .stat-box{flex:1; min-width:120px; background:var(--white); border:1px solid var(--line); padding:16px; text-align:center;}
+  .stat-box .num{font-size:1.4rem; font-weight:700; font-family:var(--mono); color:var(--carbon-red);}
+  .stat-box .lbl{font-size:.7rem; color:var(--ink-soft); margin-top:2px;}
+
+  .nav-cards{display:flex; flex-direction:column; gap:12px;}
+  .nav-card{
+    display:flex; align-items:center; gap:16px; background:var(--white); border:1px solid var(--line);
+    padding:20px; transition:transform .15s, border-color .15s;
   }
-  input:disabled{opacity:.65; cursor:not-allowed;}
-  input:focus, select:focus{outline:2px solid var(--carbon-red); outline-offset:1px;}
-  select{
-    appearance:none; -webkit-appearance:none; -moz-appearance:none; cursor:pointer;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%231F2A38' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-    background-repeat:no-repeat; background-position:right 12px center; background-size:11px 7px; padding-right:34px;
-  }
-  [data-theme="dark"] select{
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%23ECE8DC' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-  }
-  .btn{padding:12px 22px; border-radius:2px; font-weight:700; font-size:.86rem; border:none; cursor:pointer; background:var(--carbon-red); color:#fff; margin-top:16px;}
-  .btn:disabled{opacity:.6; cursor:not-allowed;}
-  .msg-box{display:none; font-size:.8rem; padding:10px 12px; margin-top:12px; border-left:4px solid; font-family:var(--mono);}
-  .msg-box.error{display:block; background:var(--paper-alt); border-color:var(--carbon-red); color:var(--carbon-red);}
-  .msg-box.success{display:block; background:var(--paper-alt); border-color:var(--ledger-green); color:var(--ledger-green);}
+  .nav-card:hover{transform:translateY(-2px); border-color:var(--carbon-red);}
+  .nav-card .icon{font-size:1.6rem; width:44px; text-align:center;}
+  .nav-card .content{flex:1;}
+  .nav-card .content h2{font-size:1rem; font-weight:700; margin-bottom:3px;}
+  .nav-card .content p{font-size:.8rem; color:var(--ink-soft);}
+  .nav-card .arrow{font-family:var(--mono); color:var(--ink-soft); font-size:1.1rem;}
 
-  table{width:100%; border-collapse:collapse; font-size:.86rem;}
-  th{text-align:left; font-family:var(--mono); font-size:.72rem; color:var(--ink-soft); padding:10px 8px; border-bottom:2px solid var(--line); white-space:nowrap;}
-  td{padding:12px 8px; border-bottom:1px solid var(--line); white-space:nowrap;}
-  tr:last-child td{border-bottom:none;}
-  .table-scroll{overflow-x:auto;}
+  .nav-cards-secondary{margin-top:16px;}
+  .nav-card-small{padding:14px 16px;}
+  .nav-card-small .icon{font-size:1.2rem; width:32px;}
+  .nav-card-small .content h2{font-size:.86rem; margin-bottom:0;}
 
-  .status-pill{display:inline-block; padding:4px 10px; border-radius:20px; font-size:.72rem; font-weight:700; font-family:var(--mono);}
-  .status-Delivered, .status-Paid{background:rgba(76,107,84,.15); color:var(--ledger-green);}
-  .status-default{background:var(--paper-alt); color:var(--ink-soft);}
-
-  .empty-state{text-align:center; padding:30px 10px; color:var(--ink-soft); font-size:.88rem;}
-  .empty-state a{color:var(--carbon-red); font-weight:700;}
-
-  .loading{text-align:center; padding:30px; color:var(--ink-soft); font-family:var(--mono); font-size:.82rem;}
-
-  .order-card{border:1px solid var(--line); padding:16px; margin-bottom:12px; background:var(--paper);}
-  .order-card-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
-  .order-num{font-size:.78rem; font-weight:700; color:var(--carbon-red);}
-  .order-service{font-size:.92rem; font-weight:600; margin-top:2px;}
-  .order-total{font-size:1rem; font-weight:700; white-space:nowrap;}
-  .order-card-pills{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px;}
-  .revision-note{font-size:.8rem; color:var(--ink-soft); font-style:italic; margin-top:8px; padding:8px 10px; background:var(--paper-alt); border-left:3px solid var(--stamp-mustard);}
-  .order-card-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
-  .action-btn{font-family:var(--mono); font-size:.74rem; font-weight:700; padding:8px 12px; border:1px solid var(--line); background:var(--white); color:var(--ink-soft); border-radius:2px; cursor:pointer;}
-  .action-btn-primary{background:var(--ledger-green); color:#fff; border-color:var(--ledger-green);}
-  .pill-note{font-family:var(--mono); font-size:.72rem; color:var(--stamp-mustard); padding:8px 4px;}
-
-  .modal-overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:center; justify-content:center; padding:20px;}
-  .modal-box{background:var(--white); border:1px solid var(--line); padding:24px; max-width:420px; width:100%;}
-  .modal-box h3{font-size:1.05rem; font-weight:700; margin-bottom:4px;}
-  textarea{width:100%; padding:10px 12px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:.9rem; border-radius:2px; resize:vertical;}
-  textarea:focus{outline:2px solid var(--carbon-red); outline-offset:1px;}
+  .loading{text-align:center; padding:60px 20px; color:var(--ink-soft); font-family:var(--mono); font-size:.85rem;}
   footer{padding:32px 24px; text-align:center; border-top:1px solid var(--line);}
   footer p{color:var(--ink-soft); font-size:.8rem;}
 </style>
@@ -143,135 +87,64 @@
   </div>
 </header>
 
-<div class="page-head">
-  <div class="avatar-circle" id="avatarCircle">?</div>
-  <div class="eyebrow">CLIENT ACCOUNT</div>
-  <h1 id="headName">My Account</h1>
-  <p class="muted-small" id="profSince"></p>
-</div>
+<div id="loadingBox" class="loading">Loading your account…</div>
 
-<div class="wrap">
-  <div class="card">
-    <div class="card-head-row">
-      <h2>Profile</h2>
-      <button type="button" class="btn btn-small" id="editProfileBtn">Edit Profile</button>
-    </div>
-
-    <!-- VIEW MODE — plain, easy-to-read summary -->
-    <div id="profileView">
-      <div class="view-section">
-        <div class="view-section-title">Basic Info</div>
-        <div class="view-grid">
-          <div><span class="view-label">Full Name</span><span class="view-value" id="vName">—</span></div>
-          <div><span class="view-label">Email</span><span class="view-value" id="vEmail">—</span></div>
-          <div><span class="view-label">Phone</span><span class="view-value" id="vPhone">—</span></div>
-          <div><span class="view-label">Alt. WhatsApp</span><span class="view-value" id="vAltPhone">—</span></div>
-        </div>
-      </div>
-      <div class="view-section">
-        <div class="view-section-title">Preferences</div>
-        <div class="view-grid">
-          <div><span class="view-label">Contact Method</span><span class="view-value" id="vContactPref">—</span></div>
-          <div><span class="view-label">Language</span><span class="view-value" id="vLanguage">—</span></div>
-          <div><span class="view-label">Birthday</span><span class="view-value" id="vBirthday">—</span></div>
-        </div>
-      </div>
-      <div class="view-section">
-        <div class="view-section-title">Additional</div>
-        <div class="view-grid view-grid-full">
-          <div><span class="view-label">Address</span><span class="view-value" id="vAddress">—</span></div>
-          <div><span class="view-label">Design Preferences</span><span class="view-value" id="vDesignPref">—</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- EDIT MODE — same form as before, hidden until "Edit Profile" is clicked -->
-    <form id="profileForm" style="display:none;">
-      <div class="view-section-title" style="margin-top:4px;">Basic Info</div>
-      <div class="profile-grid">
-        <div class="field">
-          <label>Full Name</label>
-          <input type="text" id="profName" required>
-        </div>
-        <div class="field">
-          <label>Email</label>
-          <input type="email" id="profEmail" disabled>
-        </div>
-        <div class="field">
-          <label>Phone Number</label>
-          <input type="tel" id="profPhone">
-        </div>
-        <div class="field">
-          <label>Alternate WhatsApp Number</label>
-          <input type="tel" id="profAltPhone" placeholder="If different from above">
-        </div>
-      </div>
-
-      <div class="view-section-title">Preferences</div>
-      <div class="profile-grid">
-        <div class="field">
-          <label>Preferred Contact Method</label>
-          <select id="profContactPref">
-            <option value="Email">Email</option>
-            <option value="WhatsApp">WhatsApp</option>
-            <option value="Phone Call">Phone Call</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Language Preference</label>
-          <select id="profLanguage">
-            <option value="Hindi">Hindi</option>
-            <option value="English">English</option>
-            <option value="Hinglish">Hinglish (Mix)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Birthday <span class="muted-small">(optional)</span></label>
-          <input type="date" id="profBirthday">
-        </div>
-      </div>
-
-      <div class="view-section-title">Additional</div>
-      <div class="profile-grid">
-        <div class="field" style="grid-column:1 / -1;">
-          <label>Address <span class="muted-small">(optional)</span></label>
-          <input type="text" id="profAddress" placeholder="For future printed/delivery orders">
-        </div>
-        <div class="field" style="grid-column:1 / -1;">
-          <label>Design Preferences <span class="muted-small">(optional)</span></label>
-          <input type="text" id="profDesignPref" placeholder="e.g. bold colors, minimal style — helps us on repeat orders">
-        </div>
-      </div>
-      <div style="display:flex; gap:10px; margin-top:6px;">
-        <button type="submit" class="btn" id="profSaveBtn">Save Profile</button>
-        <button type="button" class="btn btn-outline" id="cancelEditBtn">Cancel</button>
-      </div>
-      <div class="msg-box" id="profMsg"></div>
-    </form>
+<div id="hubContent" style="display:none;">
+  <div class="page-head">
+    <div class="avatar-circle" id="avatarCircle">?</div>
+    <div class="eyebrow">CLIENT ACCOUNT</div>
+    <h1 id="headName">Welcome</h1>
+    <p class="muted-small" id="clientSince"></p>
   </div>
 
-  <div class="card">
-    <h2>Order History</h2>
-    <div id="ordersArea"><div class="loading">Loading your orders…</div></div>
-  </div>
-</div>
+  <div class="wrap">
+    <div class="stats-row" id="statsRow"></div>
 
-<div class="modal-overlay" id="revisionModal">
-  <div class="modal-box">
-    <h3>Request a Revision</h3>
-    <p class="muted-small" style="margin-bottom:14px;">Order <span id="revisionOrderLabel" class="mono"></span></p>
-    <form id="revisionForm">
-      <input type="hidden" id="revisionOrderId">
-      <div class="field">
-        <label>What needs to change?</label>
-        <textarea id="revisionNotes" rows="4" required placeholder="Describe what you'd like changed…"></textarea>
-      </div>
-      <div style="display:flex; gap:10px; margin-top:10px;">
-        <button type="submit" class="btn" id="revisionSubmitBtn">Send Request</button>
-        <button type="button" class="btn btn-outline" id="revisionCancelBtn">Cancel</button>
-      </div>
-      <div class="msg-box" id="revisionMsg"></div>
-    </form>
+    <div class="nav-cards">
+      <a href="profile.html" class="nav-card">
+        <div class="icon">✏️</div>
+        <div class="content"><h2>Edit Profile</h2><p>Your name, contact details, and preferences</p></div>
+        <div class="arrow">→</div>
+      </a>
+      <a href="orders.html" class="nav-card">
+        <div class="icon">📦</div>
+        <div class="content"><h2>My Orders</h2><p>Order history, downloads, and revisions</p></div>
+        <div class="arrow">→</div>
+      </a>
+      <a href="settings.html" class="nav-card">
+        <div class="icon">⚙️</div>
+        <div class="content"><h2>Settings</h2><p>Notification preferences and account options</p></div>
+        <div class="arrow">→</div>
+      </a>
+    </div>
+
+    <div class="nav-cards nav-cards-secondary">
+      <a href="billing.html" class="nav-card nav-card-small">
+        <div class="icon">🧾</div>
+        <div class="content"><h2>Billing & Invoices</h2></div>
+        <div class="arrow">→</div>
+      </a>
+      <a href="activity.html" class="nav-card nav-card-small">
+        <div class="icon">🕓</div>
+        <div class="content"><h2>Activity</h2></div>
+        <div class="arrow">→</div>
+      </a>
+      <a href="refer.html" class="nav-card nav-card-small">
+        <div class="icon">🎁</div>
+        <div class="content"><h2>Refer & Earn</h2></div>
+        <div class="arrow">→</div>
+      </a>
+      <a href="help.html" class="nav-card nav-card-small">
+        <div class="icon">🆘</div>
+        <div class="content"><h2>Help & Support</h2></div>
+        <div class="arrow">→</div>
+      </a>
+      <a href="call.html" class="nav-card nav-card-small">
+        <div class="icon">📞</div>
+        <div class="content"><h2>Book a Call</h2></div>
+        <div class="arrow">→</div>
+      </a>
+    </div>
   </div>
 </div>
 
@@ -295,197 +168,43 @@
     const user = session.user;
     const meta = user.user_metadata || {};
     const name = meta.full_name || '';
-
-    // Avatar initials — first letter of first two words
     const initials = name.trim() ? name.trim().split(/\s+/).slice(0, 2).map(w => w[0].toUpperCase()).join('') : (user.email || '?')[0].toUpperCase();
+
     document.getElementById('avatarCircle').textContent = initials;
-    document.getElementById('headName').textContent = name || 'My Account';
-    document.getElementById('profSince').textContent = 'Client since ' + fmtDate(user.created_at);
+    document.getElementById('headName').textContent = name ? `Hi, ${name.split(' ')[0]}` : 'Welcome';
+    document.getElementById('clientSince').textContent = 'Client since ' + fmtDate(user.created_at);
 
-    // Fill edit-mode form
-    document.getElementById('profName').value = name;
-    document.getElementById('profEmail').value = user.email || '';
-    document.getElementById('profPhone').value = meta.phone || '';
-    document.getElementById('profAltPhone').value = meta.alt_phone || '';
-    document.getElementById('profContactPref').value = meta.contact_pref || 'Email';
-    document.getElementById('profLanguage').value = meta.language_pref || 'Hindi';
-    document.getElementById('profBirthday').value = meta.birthday || '';
-    document.getElementById('profAddress').value = meta.address || '';
-    document.getElementById('profDesignPref').value = meta.design_pref || '';
+    document.getElementById('loadingBox').style.display = 'none';
+    document.getElementById('hubContent').style.display = 'block';
 
-    // Fill view-mode summary
-    document.getElementById('vName').textContent = name || '—';
-    document.getElementById('vEmail').textContent = user.email || '—';
-    document.getElementById('vPhone').textContent = meta.phone || '—';
-    document.getElementById('vAltPhone').textContent = meta.alt_phone || '—';
-    document.getElementById('vContactPref').textContent = meta.contact_pref || 'Email';
-    document.getElementById('vLanguage').textContent = meta.language_pref || 'Hindi';
-    document.getElementById('vBirthday').textContent = meta.birthday ? fmtDate(meta.birthday) : '—';
-    document.getElementById('vAddress').textContent = meta.address || '—';
-    document.getElementById('vDesignPref').textContent = meta.design_pref || '—';
+    // Apply a pending referral code, if one was captured before login — only once,
+    // and never let someone credit themselves with their own code
+    const pendingRef = localStorage.getItem('gb_pending_ref');
+    if (pendingRef && !meta.referred_by) {
+      const myOwnCode = 'GB-' + user.id.replace(/-/g, '').slice(0, 8).toUpperCase();
+      if (pendingRef !== myOwnCode) {
+        await sb.auth.updateUser({ data: { referred_by: pendingRef } });
+      }
+      localStorage.removeItem('gb_pending_ref');
+    }
 
+    // Small stats row — best-effort, doesn't block the hub from showing
     try {
       const res = await fetch('/api/my-orders', {
         headers: { Authorization: `Bearer ${session.access_token}` }
       });
       const result = await res.json();
-      const area = document.getElementById('ordersArea');
-
-      if (!res.ok || !result.success) {
-        area.innerHTML = `<div class="empty-state">Could not load your orders right now. Please refresh the page.</div>`;
-        return;
+      if (res.ok && result.success) {
+        const total = result.orders.length;
+        const delivered = result.orders.filter(o => o.status === 'Order Delivered').length;
+        document.getElementById('statsRow').innerHTML = `
+          <div class="stat-box"><div class="num">${total}</div><div class="lbl">Total Orders</div></div>
+          <div class="stat-box"><div class="num">${delivered}</div><div class="lbl">Delivered</div></div>
+        `;
       }
-
-      if (!result.orders.length) {
-        area.innerHTML = `<div class="empty-state">You haven't placed any orders yet.<br><a href="order.html">Place your first order →</a></div>`;
-        return;
-      }
-
-      const cards = result.orders.map(o => {
-        const revisionBtn = o.revision_requested
-          ? `<span class="pill-note">🔄 Revision requested</span>`
-          : `<button type="button" class="action-btn" onclick="openRevision('${o.id}','${o.order_number}')">Request Revision</button>`;
-
-        const downloadBtn = o.delivery_signed_url
-          ? `<a href="${o.delivery_signed_url}" target="_blank" class="action-btn action-btn-primary">⬇ Download Files</a>`
-          : '';
-
-        const reorderData = encodeURIComponent(JSON.stringify({ service: o.service, size: o.size, quantity: o.quantity, details: o.details || '' }));
-
-        return `
-        <div class="order-card">
-          <div class="order-card-top">
-            <div>
-              <span class="mono order-num">${o.order_number}</span>
-              <div class="order-service">${o.service}${o.size ? ' · ' + o.size : ''}${o.quantity > 1 ? ' · Qty ' + o.quantity : ''}</div>
-            </div>
-            <div class="order-total">₹${o.total_price}</div>
-          </div>
-          <div class="order-card-pills">
-            <span class="status-pill ${o.status === 'Order Delivered' ? 'status-Delivered' : 'status-default'}">${o.status}</span>
-            <span class="status-pill ${o.payment_status === 'Paid' ? 'status-Paid' : 'status-default'}">${o.payment_status}</span>
-            <span class="mono muted-small">${fmtDate(o.created_at)}</span>
-          </div>
-          ${o.revision_requested && o.revision_notes ? `<div class="revision-note">"${o.revision_notes}"</div>` : ''}
-          <div class="order-card-actions">
-            ${downloadBtn}
-            ${revisionBtn}
-            <button type="button" class="action-btn" onclick='reorderThis(${reorderData})'>↻ Reorder</button>
-          </div>
-        </div>`;
-      }).join('');
-
-      area.innerHTML = cards;
-    } catch (err) {
-      document.getElementById('ordersArea').innerHTML = `<div class="empty-state">Could not load your orders right now. Please refresh the page.</div>`;
-    }
+    } catch {}
   }
   init();
-
-  // ---- Reorder: stash the order's details and jump to the Order page ----
-  function reorderThis(data){
-    sessionStorage.setItem('gb_reorder', JSON.stringify(data));
-    window.location.href = 'order.html';
-  }
-
-  // ---- Request Revision modal ----
-  function openRevision(orderId, orderNumber){
-    document.getElementById('revisionOrderId').value = orderId;
-    document.getElementById('revisionOrderLabel').textContent = orderNumber;
-    document.getElementById('revisionNotes').value = '';
-    document.getElementById('revisionMsg').className = 'msg-box';
-    document.getElementById('revisionModal').style.display = 'flex';
-  }
-  document.getElementById('revisionCancelBtn').addEventListener('click', () => {
-    document.getElementById('revisionModal').style.display = 'none';
-  });
-  document.getElementById('revisionForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('revisionSubmitBtn');
-    const msg = document.getElementById('revisionMsg');
-    btn.disabled = true; btn.textContent = 'Sending…'; msg.className = 'msg-box';
-
-    const { data } = await sb.auth.getSession();
-    const res = await fetch('/api/request-revision', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session.access_token}` },
-      body: JSON.stringify({
-        orderId: document.getElementById('revisionOrderId').value,
-        notes: document.getElementById('revisionNotes').value.trim(),
-      }),
-    });
-    const result = await res.json();
-    btn.disabled = false; btn.textContent = 'Send Request';
-
-    if (!res.ok) {
-      msg.textContent = result.error || 'Something went wrong.'; msg.className = 'msg-box error';
-      return;
-    }
-
-    msg.textContent = 'Revision request sent!'; msg.className = 'msg-box success';
-    setTimeout(() => {
-      document.getElementById('revisionModal').style.display = 'none';
-      init();
-    }, 900);
-  });
-
-  const profileView = document.getElementById('profileView');
-  const profileForm = document.getElementById('profileForm');
-  document.getElementById('editProfileBtn').addEventListener('click', () => {
-    profileView.style.display = 'none';
-    profileForm.style.display = 'block';
-  });
-  document.getElementById('cancelEditBtn').addEventListener('click', () => {
-    profileForm.style.display = 'none';
-    profileView.style.display = 'block';
-    document.getElementById('profMsg').className = 'msg-box';
-  });
-
-  document.getElementById('profileForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('profSaveBtn');
-    const msg = document.getElementById('profMsg');
-    btn.disabled = true; btn.textContent = 'Saving…'; msg.className = 'msg-box';
-
-    const updated = {
-      full_name: document.getElementById('profName').value.trim(),
-      phone: document.getElementById('profPhone').value.trim(),
-      alt_phone: document.getElementById('profAltPhone').value.trim(),
-      contact_pref: document.getElementById('profContactPref').value,
-      language_pref: document.getElementById('profLanguage').value,
-      birthday: document.getElementById('profBirthday').value,
-      address: document.getElementById('profAddress').value.trim(),
-      design_pref: document.getElementById('profDesignPref').value.trim(),
-    };
-
-    const { error } = await sb.auth.updateUser({ data: updated });
-
-    btn.disabled = false; btn.textContent = 'Save Profile';
-    if (error) {
-      msg.textContent = error.message; msg.className = 'msg-box error';
-      return;
-    }
-
-    // Refresh view-mode summary + avatar/heading immediately, then switch back
-    const initials = updated.full_name.trim() ? updated.full_name.trim().split(/\s+/).slice(0, 2).map(w => w[0].toUpperCase()).join('') : (document.getElementById('profEmail').value || '?')[0].toUpperCase();
-    document.getElementById('avatarCircle').textContent = initials;
-    document.getElementById('headName').textContent = updated.full_name || 'My Account';
-    document.getElementById('vName').textContent = updated.full_name || '—';
-    document.getElementById('vPhone').textContent = updated.phone || '—';
-    document.getElementById('vAltPhone').textContent = updated.alt_phone || '—';
-    document.getElementById('vContactPref').textContent = updated.contact_pref;
-    document.getElementById('vLanguage').textContent = updated.language_pref;
-    document.getElementById('vBirthday').textContent = updated.birthday ? fmtDate(updated.birthday) : '—';
-    document.getElementById('vAddress').textContent = updated.address || '—';
-    document.getElementById('vDesignPref').textContent = updated.design_pref || '—';
-
-    msg.textContent = 'Profile saved!'; msg.className = 'msg-box success';
-    setTimeout(() => {
-      profileForm.style.display = 'none';
-      profileView.style.display = 'block';
-      msg.className = 'msg-box';
-    }, 900);
-  });
 
   document.getElementById('logoutBtn').addEventListener('click', async () => {
     await sb.auth.signOut();

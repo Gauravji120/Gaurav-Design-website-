@@ -74,6 +74,24 @@
   .order-top .oid{font-family:var(--mono); font-weight:700;}
   .order-meta{font-size:.82rem; color:var(--ink-soft); margin-bottom:12px;}
   .revision-alert{background:var(--paper-alt); border-left:3px solid var(--stamp-mustard); padding:8px 12px; font-size:.8rem; margin-bottom:12px;}
+  .call-card{background:var(--white); border:1px solid var(--line); padding:16px; margin-bottom:10px;}
+  .call-card .top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .call-card .name{font-weight:700; font-size:.92rem;}
+  .call-card .meta{font-size:.78rem; color:var(--ink-soft); margin-top:2px;}
+  .call-card .reason{font-size:.86rem; margin-top:8px;}
+  .call-status-pill{font-family:var(--mono); font-size:.68rem; font-weight:700; padding:3px 8px; border-radius:20px; background:var(--paper-alt); color:var(--ink-soft); white-space:nowrap;}
+  .admin-msg-thread{display:none; margin-top:10px; border-top:1px solid var(--line); padding-top:10px;}
+  .admin-msg-thread.open{display:block;}
+  .admin-msg-list{max-height:180px; overflow-y:auto; margin-bottom:8px;}
+  .admin-msg-bubble{max-width:80%; padding:8px 12px; border-radius:10px; font-size:.82rem; margin-bottom:6px;}
+  .admin-msg-bubble.admin{background:var(--carbon-red); color:#fff; margin-left:auto; border-bottom-right-radius:2px;}
+  .admin-msg-bubble.client{background:var(--paper-alt); margin-right:auto; border-bottom-left-radius:2px;}
+  .admin-msg-input-row{display:flex; gap:8px;}
+  .admin-msg-input-row input[type="text"]{flex:1;}
+  .admin-attach-btn{background:var(--paper); border:1px solid var(--line); border-radius:2px; padding:0 10px; cursor:pointer; font-size:1rem;}
+  .admin-msg-attachment-img{max-width:180px; border-radius:6px; display:block; margin-top:6px;}
+  .admin-msg-attachment-file{display:inline-block; margin-top:6px; font-size:.78rem; text-decoration:underline;}
+  .admin-attach-preview{font-size:.72rem; color:var(--ink-soft); margin-bottom:6px; display:none;}
   .order-controls{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
   .badge{font-family:var(--mono); font-size:.68rem; font-weight:700; padding:3px 9px; border-radius:12px;}
   .badge.paid{background:rgba(76,107,84,.15); color:var(--ledger-green);}
@@ -118,6 +136,7 @@
   <div class="tabs">
     <button class="tab-btn active" data-tab="overview">Overview</button>
     <button class="tab-btn" data-tab="orders">Orders</button>
+    <button class="tab-btn" data-tab="calls">Call Requests</button>
     <button class="tab-btn" data-tab="pricing">Pricing &amp; Offers</button>
     <button class="tab-btn" data-tab="coupons">Coupons</button>
     <button class="tab-btn" data-tab="payment">Payment &amp; Social</button>
@@ -148,6 +167,12 @@
       <button class="btn" id="searchBtn">Search</button>
     </div>
     <div id="ordersList"><div class="loading-msg">Loading orders…</div></div>
+  </div>
+
+  <!-- CALL REQUESTS -->
+  <div class="panel" id="panel-calls">
+    <h2>Call Requests</h2>
+    <div id="callsList"><div class="loading-msg">Loading call requests…</div></div>
   </div>
 
   <!-- PRICING & OFFERS -->
@@ -330,6 +355,7 @@
       const target = 'panel-' + btn.dataset.tab;
       panels.forEach(p => p.classList.toggle('active', p.id === target));
       if (btn.dataset.tab === 'orders') loadOrders();
+      if (btn.dataset.tab === 'calls') loadCalls();
       if (btn.dataset.tab === 'pricing') { loadSettings(); loadServices(); }
       if (btn.dataset.tab === 'coupons') loadCoupons();
       if (btn.dataset.tab === 'payment') { loadSettings(); loadSocialLinks(); }
@@ -341,6 +367,55 @@
 
   // ===== Orders =====
   let allOrders = [];
+
+  async function loadCalls(){
+    const list = document.getElementById('callsList');
+    try {
+      const res = await apiFetch('/api/admin-call-requests', { headers: authHeaders({}) });
+      const result = await res.json();
+      if (!result.success || !result.requests.length) {
+        list.innerHTML = '<div class="loading-msg">No call requests yet.</div>';
+        return;
+      }
+      list.innerHTML = result.requests.map(r => `
+        <div class="call-card">
+          <div class="top">
+            <div>
+              <div class="name">${r.client_name}</div>
+              <div class="meta">${r.email}${r.phone ? ' · ' + r.phone : ''}</div>
+              <div class="meta">Preferred: ${r.preferred_time || 'Not specified'}</div>
+            </div>
+            <span class="call-status-pill">${r.status}</span>
+          </div>
+          <div class="reason">${r.reason}</div>
+          <div style="margin-top:10px; display:flex; gap:8px;">
+            <select class="callStatusSelect" data-id="${r.id}">
+              <option value="Pending" ${r.status==='Pending'?'selected':''}>Pending</option>
+              <option value="Contacted" ${r.status==='Contacted'?'selected':''}>Contacted</option>
+              <option value="Done" ${r.status==='Done'?'selected':''}>Done</option>
+            </select>
+          </div>
+        </div>
+      `).join('');
+
+      list.querySelectorAll('.callStatusSelect').forEach(sel => {
+        sel.addEventListener('change', async () => {
+          const id = sel.dataset.id;
+          sel.disabled = true;
+          try {
+            await apiFetch('/api/admin-call-requests', {
+              method: 'PATCH',
+              headers: authHeaders({ 'Content-Type': 'application/json' }),
+              body: JSON.stringify({ id, status: sel.value })
+            });
+          } catch(e) {}
+          sel.disabled = false;
+        });
+      });
+    } catch(e) {
+      list.innerHTML = '<div class="loading-msg">Could not load call requests.</div>';
+    }
+  }
 
   async function loadOrders(query){
     const list = document.getElementById('ordersList');
@@ -401,6 +476,17 @@
             <input type="file" class="deliveryFileInput" data-id="${order.id}" style="display:none;">
           </label>
           ${order.status === 'Order Delivered' ? `<button class="btn btn-sm btn-ghost reviewRequestBtn" data-id="${order.id}">📝 Send review request</button>` : ''}
+          <button class="btn btn-sm btn-ghost adminMsgToggleBtn" data-id="${order.id}">💬 Messages</button>
+        </div>
+        <div class="admin-msg-thread" id="adminThread-${order.id}">
+          <div class="admin-msg-list" id="adminMsgList-${order.id}"></div>
+          <div class="admin-attach-preview" id="adminAttachPreview-${order.id}"></div>
+          <div class="admin-msg-input-row">
+            <button type="button" class="admin-attach-btn" onclick="document.getElementById('adminFileInput-${order.id}').click()">📎</button>
+            <input type="file" id="adminFileInput-${order.id}" style="display:none;" onchange="showAdminAttachPreview('${order.id}')">
+            <input type="text" id="adminMsgInput-${order.id}" placeholder="Reply to client…">
+            <button class="btn btn-sm adminMsgSendBtn" data-id="${order.id}">Send</button>
+          </div>
         </div>
         <div class="email-box" id="emailBox-${order.id}">
           <textarea placeholder="Type your message to the client…" id="emailMsg-${order.id}"></textarea>
@@ -503,6 +589,90 @@
           btn.disabled = false;
           btn.textContent = '📝 Send review request';
         }
+      });
+    });
+
+    function fmtMsgTime(iso){
+      return new Date(iso).toLocaleString('en-IN', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+    }
+
+    async function loadAdminThread(orderId){
+      const listEl = document.getElementById(`adminMsgList-${orderId}`);
+      listEl.innerHTML = '<div style="font-size:.78rem; color:var(--ink-soft);">Loading…</div>';
+      try {
+        const res = await apiFetch(`/api/admin-order-messages?orderId=${orderId}`, { headers: authHeaders({}) });
+        const result = await res.json();
+        if (!result.success || !result.messages.length) {
+          listEl.innerHTML = '<div style="font-size:.78rem; color:var(--ink-soft);">No messages yet.</div>';
+          return;
+        }
+        listEl.innerHTML = result.messages.map(m => {
+          let attachHtml = '';
+          if (m.attachment_url) {
+            const isImg = /\.(jpe?g|png|gif|webp)$/i.test(m.attachment_name || '');
+            attachHtml = isImg
+              ? `<a href="${m.attachment_url}" target="_blank"><img src="${m.attachment_url}" class="admin-msg-attachment-img"></a>`
+              : `<a href="${m.attachment_url}" target="_blank" class="admin-msg-attachment-file">📎 ${m.attachment_name}</a>`;
+          }
+          return `
+          <div class="admin-msg-bubble ${m.sender_type}">
+            ${m.message}
+            ${attachHtml}
+            <div style="font-size:.62rem; opacity:.75; margin-top:3px;">${fmtMsgTime(m.created_at)}</div>
+          </div>`;
+        }).join('');
+        listEl.scrollTop = listEl.scrollHeight;
+      } catch(e) {
+        listEl.innerHTML = '<div style="font-size:.78rem; color:var(--ink-soft);">Could not load messages.</div>';
+      }
+    }
+
+    window.showAdminAttachPreview = function(orderId){
+      const input = document.getElementById(`adminFileInput-${orderId}`);
+      const preview = document.getElementById(`adminAttachPreview-${orderId}`);
+      if (input.files.length) {
+        preview.style.display = 'block';
+        preview.textContent = `📎 ${input.files[0].name} (tap Send to attach)`;
+      } else {
+        preview.style.display = 'none';
+      }
+    };
+
+    list.querySelectorAll('.adminMsgToggleBtn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        const thread = document.getElementById(`adminThread-${id}`);
+        const isOpening = !thread.classList.contains('open');
+        thread.classList.toggle('open');
+        if (isOpening) await loadAdminThread(id);
+      });
+    });
+
+    list.querySelectorAll('.adminMsgSendBtn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        const input = document.getElementById(`adminMsgInput-${id}`);
+        const fileInput = document.getElementById(`adminFileInput-${id}`);
+        const message = input.value.trim();
+        const file = fileInput.files[0];
+        if (!message && !file) return;
+        input.disabled = true;
+        try {
+          const fd = new FormData();
+          fd.append('orderId', id);
+          fd.append('message', message);
+          if (file) fd.append('file', file);
+          await apiFetch('/api/admin-order-messages', {
+            method: 'POST',
+            headers: authHeaders({}),
+            body: fd
+          });
+          input.value = '';
+          fileInput.value = '';
+          document.getElementById(`adminAttachPreview-${id}`).style.display = 'none';
+          await loadAdminThread(id);
+        } catch(e) {}
+        input.disabled = false;
       });
     });
 
