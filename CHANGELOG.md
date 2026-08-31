@@ -2,6 +2,30 @@
 
 Dated history of what was built. Newest first.
 
+## Client Account System + Retention & Delivery Feature Batch
+
+**Added**
+- Supabase Auth wired in for clients — Google OAuth and passwordless email magic link (`login.html`); first login also creates the account, no separate signup step
+- Account hub (`account.html`) plus `profile.html` (edit profile), `orders.html` (My Orders), `settings.html` (notification preferences, delete account), `billing.html`, `invoice.html`, `activity.html`, `refer.html`, `call.html`, `help.html`
+- Orders now require a logged-in client — no more guest checkout (decision recorded earlier in ROADMAP, now shipped); enforced both by hiding the order form on the frontend and rejecting with 401 server-side in `submit-order.mts`
+- Loyalty points: clients earn 1 point per ₹100 on paid orders, redeemable at checkout; balance is always recomputed server-side from real order history, never trusted from the browser (`netlify/lib/loyalty-points.mts`, `get-loyalty-points.mts`)
+- Refer & Earn: every client gets a referral code derived from their user id (`GB-XXXXXXXX`); a `?ref=CODE` link captures the code before login and writes it once to `user_metadata.referred_by` after signup, never overwritten, can't credit your own code to yourself (`get-referral-stats.mts`)
+- File delivery: admin uploads final design files to a new private `deliverables` storage bucket; client downloads via a 1-hour signed URL from My Orders (`admin-upload-delivery.mts`)
+- Revision requests: client can request a revision on their own order (ownership verified server-side); admin can mark it handled from the dashboard, which emails the client (`request-revision.mts`, `admin-orders.mts`'s new `clear_revision` action)
+- Order messaging: a per-order chat thread between client and admin, with optional file attachments, backed by a new `order_messages` table and `message-attachments` storage bucket (`order-messages.mts` for the client side, `admin-order-messages.mts` for the admin side)
+- Call booking: logged-in clients can request a call from the account hub; admin views/updates requests from the dashboard, backed by a new `call_requests` table (`book-call.mts`, `admin-call-requests.mts`)
+- Notification preferences: clients can choose to receive all order emails, high-priority only (delivery + payment confirmations), or none (`netlify/lib/notification-pref.mts`)
+- Self-service account deletion (`delete-account.mts`) — the Supabase Auth user is removed, but past orders keep their history since `orders.user_id` is set to null rather than the order being deleted
+- Admin can now manually trigger a review/referral-request email to a client after delivery, from `admin-orders.mts`
+- New `orders` columns: `user_id`, `delivery_method`, `points_redeemed`, `points_discount_amount`, `revision_requested`, `revision_notes`, `revision_requested_at`, `delivery_file_path`, `delivery_file_uploaded_at`
+
+**Changed**
+- Transactional email provider switched from Resend to Brevo — every function now sends through the shared `netlify/lib/send-email.mts` helper using the `BREVO_API_KEY` environment variable; `RESEND_API_KEY` is no longer referenced anywhere in the codebase
+- Status-change emails (Order Confirmed / Design in Progress / Review / Order Delivered) now respect each client's notification preference — except delivery and payment confirmations, which always send regardless of preference
+
+**Note**
+- `track-order.html` / `track-order.mts` (guest lookup by Order ID + phone) is still present and functional alongside the new My Orders flow — not yet retired, tracked as a decision to make in ROADMAP's Tech Debt section.
+
 ## Fixed: Invisible Pricing Bug (Home Page)
 
 **Bug:** Home page pricing section appeared completely blank to the user — but the text was actually present in the DOM (selectable/copyable), just not visible. Confirmed via direct API test (`/api/site-settings` returned correct data every time) that the backend, database, and env vars were all fine — the bug was 100% client-side.
@@ -44,7 +68,7 @@ Dated history of what was built. Newest first.
 **Fixed**
 - Social links were briefly rendered in the hamburger menu in addition to the footer — corrected to footer-only per explicit instruction
 - Leftover `GD-0001` placeholder text in 3 files after the prefix rebrand (`payment.html`, `order.html`, `track-order.html`) — corrected to `GB-`
-- `RESEND_API_KEY` had been saved with the wrong casing (`resend_api_key`) directly in the Netlify dashboard at least twice, silently breaking email — re-saved with correct casing
+- `RESEND_API_KEY` had been saved with the wrong casing (`resend_api_key`) directly in the Netlify dashboard at least twice, silently breaking email — re-saved with correct casing (this env var is now retired entirely — see the Client Account System batch above)
 - Supabase project had auto-paused from free-tier inactivity, which looked like "nothing works" — restored via `restore_project`
 
 ## Admin Dashboard Build
