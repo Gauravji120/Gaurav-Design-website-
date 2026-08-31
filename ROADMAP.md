@@ -5,8 +5,8 @@
 ## ✅ Shipped
 
 - [x] Home, About & FAQ, Portfolio, Order, Payment, Track Order pages
-- [x] Admin Login + Admin Dashboard (Orders / Pricing & Offers / Coupons / Payment & Social tabs)
-- [x] Database (8 tables) + 2 storage buckets, all RLS-locked
+- [x] Admin Login + Admin Dashboard (Orders / Pricing & Offers / Coupons / Payment & Social / Call Requests tabs, plus per-order messaging and delivery upload)
+- [x] Database (11 tables: orders, coupons, services, social_links, site_settings, admin_users, admin_login_attempts, email_log, call_requests, order_messages, plus auth.users via Supabase Auth) + 4 storage buckets, all RLS-locked
 - [x] Order submit → save → confirmation email (client) + alert email (owner)
 - [x] Coupon system — apply on order form, server-side re-validation, snapshotted on the order
 - [x] Quantity selector + server-computed total price (order form, success screen, payment page)
@@ -17,18 +17,24 @@
 - [x] "Pause new orders" switch — admin toggle + custom message; enforced both in the UI (order form hidden) and server-side (submit-order.mts rejects with 503 even if someone bypasses the frontend)
 - [x] Branded 404 error page
 - [x] Fixed critical bug: Home page pricing was invisible (opacity:0 from scroll-reveal animation never triggering on dynamically-inserted cards) — see CHANGELOG for full root cause
+- [x] **Client Account System** — Supabase Auth (Google OAuth + passwordless email magic link), `login.html`, account hub (`account.html`) with Profile / My Orders / Settings / Billing / Activity / Refer & Earn / Help / Book a Call, order placement now requires login (no guest checkout), self-service account deletion
+- [x] Loyalty points — earn on paid orders (₹100 → 1 point), redeemable at checkout, balance always recomputed server-side
+- [x] Refer & Earn — per-client referral code derived from their user id, captured via `?ref=` link on signup
+- [x] File delivery system — admin uploads final files to a private bucket; client downloads via a signed URL from My Orders
+- [x] Revision request — client can request a revision on their own order from My Orders; admin can mark it handled, which notifies the client
+- [x] Order messaging — per-order chat thread between client and admin, with optional file attachments
+- [x] Call booking — client requests a call from the account hub; admin manages requests from the dashboard
+- [x] Notification preferences — client can choose all / important-only / none for order-status emails
+- [x] Switched transactional email provider: Resend → Brevo
+
+## 🔧 Tech Debt / Cleanup
+
+- [ ] `track-order.html` / `track-order.mts` (guest lookup by Order ID + phone) is still present alongside My Orders. Decide: keep as a fallback for people who don't want an account, or retire it now that ordering requires login anyway.
+- [ ] `site_settings` still has unused `price_poster`/`price_thumbnail`/`price_packaging`/`price_book` columns left over from before the dynamic `services` table — safe to drop whenever convenient.
 
 ## 🔴 High Priority — Not Started
 
 - [ ] **Real UPI QR code + UPI ID** (payment page still shows a labeled sample/placeholder)
-- [ ] **Client Account System** (biggest pending item)
-  - [ ] Enable Supabase Auth + Google OAuth provider
-  - [ ] New Login/Signup page
-  - [ ] Order page requires login; auto-fills name/email/phone from account
-  - [ ] New "My Account" page — profile + order history (replaces Track Order)
-  - [ ] Remove `track-order.html` + `track-order.mts` once My Account ships
-  - [ ] Add `user_id` to `orders`, RLS policy so a logged-in user can read only their own rows
-  - [ ] **Decision already made:** account is mandatory to place an order — no guest checkout. Pre-account orders stay admin-only.
 
 ## 🟡 New Services To Add (no code needed — just use the Admin Dashboard)
 
@@ -44,8 +50,6 @@
 
 ## 🟠 Order & Delivery Experience
 
-- [ ] Revision request button
-- [ ] File delivery system (download final files from the site)
 - [ ] Estimated delivery date auto-calculation
 - [ ] "What happens next" timeline on order success
 - [ ] Rush order option
@@ -61,8 +65,7 @@
 
 ## 🔵 Retention & Growth
 
-- [ ] Refer & Earn system
-- [ ] Loyalty points
+- [ ] Loyalty points redemption UI polish / balance display on more pages (core system is shipped — this is refinement)
 - [ ] Birthday/anniversary discount
 - [ ] "Verified Client" badges
 
@@ -70,7 +73,7 @@
 
 - [ ] WhatsApp automation for status updates
 - [ ] SMS notifications
-- [ ] Live chat widget
+- [ ] Live chat widget (order messaging is per-order and account-gated — this would be a site-wide, pre-account widget)
 - [ ] FAQ chatbot
 
 ## ⚪ Admin Dashboard Improvements
