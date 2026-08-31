@@ -2,7 +2,7 @@
 
 ## Database Schema (Supabase Postgres)
 
-All tables have Row Level Security (RLS) **enabled with zero public policies** — only the `service_role` key (used exclusively inside Netlify Functions) can read/write. The public site never talks to Supabase directly with an anon key for data tables.
+All tables have Row Level Security (RLS) **enabled with zero public policies** — only the `service_role` key (used exclusively inside Netlify Functions) can read/write. The public site never talks to Supabase directly with an anon key for data tables. The one exception is Supabase Auth itself (`auth.*`), which the frontend talks to directly with the anon key via the Supabase JS client — that's standard and safe (it's what Supabase Auth is designed for), and every function that needs to trust a client's identity re-verifies their access token server-side rather than trusting anything sent from the browser.
 
 ### `orders`
 | Column | Type | Notes |
@@ -18,6 +18,15 @@ All tables have Row Level Security (RLS) **enabled with zero public policies** �
 | quantity | integer | default 1 |
 | unit_price, total_price | numeric | computed server-side at order time, never trusted from client |
 | coupon_code, discount_percent | text/numeric | snapshotted at order time (not a live join) so historical orders stay accurate if a coupon later changes |
+| user_id | uuid | FK to `auth.users`, `ON DELETE SET NULL` — the logged-in client who placed the order. Required at order time (no guest checkout); can end up null later only if the client deletes their account. |
+| delivery_method | text | how the client wants to receive files, e.g. `"Email"` — captured on the order form |
+| points_redeemed | integer | loyalty points the client redeemed on this order, re-validated server-side against their real balance |
+| points_discount_amount | numeric | ₹ value of `points_redeemed` (1 point = ₹1, capped so it can never exceed the order total) |
+| revision_requested | boolean | set by `request-revision.mts`, cleared by admin via `admin-orders.mts` (`clear_revision`) |
+| revision_notes | text | client's description of what needs to change |
+| revision_requested_at | timestamptz | |
+| delivery_file_path | text | path within the private `deliverables` storage bucket; set by `admin-upload-delivery.mts` |
+| delivery_file_uploaded_at | timestamptz | |
 | created_at, updated_at | timestamptz | |
 
 ### `coupons`
@@ -30,7 +39,7 @@ service_key (unique slug), name, price, active, display_order. **This is what po
 platform, url, display_order. Renders in the **footer only** (not the hamburger menu — that was a deliberate correction). Admin can add unlimited platforms; a fixed icon set exists in `index.html` for common platforms (Instagram, YouTube, Facebook, Twitter/X, LinkedIn, Pinterest, Snapchat, Telegram, TikTok, Threads).
 
 ### `site_settings` (single row, id=1)
-offer_text, offer_active, upi_id, upi_qr_url, instagram_qr_url, whatsapp_number. (price_poster/thumbnail/packaging/book columns still exist here from before the dynamic `services` table was introduced — they're vestigial and unused by the frontend now, safe to ignore or drop later.)
+offer_text, offer_active, upi_id, upi_qr_url, instagram_qr_url, whatsapp_number, orders_paused, orders_paused_message. (price_poster/thumbnail/packaging/book columns still exist here from before the dynamic `services` table was introduced — they're vestigial and unused by the frontend now, safe to ignore or drop later.)
 
 ### `admin_users`
 username, password_hash (bcrypt via Postgres `pgcrypto`, compared inside a `security definer` SQL function `verify_admin_login()` — the plaintext password is never compared in application code).
@@ -41,48 +50,75 @@ Brute-force protection: 6 failed attempts per username within 15 minutes trigger
 ### `email_log`
 order_id, email_type, sent_to, sent_at, status — audit trail of every email sent.
 
+### `call_requests`
+user_id, client_name, email, phone, preferred_time, reason, status, created_at. A logged-in client requests a call from `call.html` (via `book-call.mts`); the admin views/updates status from the Admin Dashboard (via `admin-call-requests.mts`).
+
+### `order_messages`
+order_id, user_id (nullable — null for admin-sent messages), sender_type (`client` / `admin`), message, attachment_path, attachment_name, created_at. Per-order chat thread between a client and the admin. Client side is `order-messages.mts` (ownership of the order is verified server-side before returning or inserting anything); admin side is `admin-order-messages.mts`.
+
 ## Storage Buckets
 
 - `reference-files` — **private**. Client-uploaded reference images/PDFs. Admin views them via short-lived signed URLs generated per-request (1 hour expiry) inside `admin-orders.mts`.
 - `qr-codes` — **public**. UPI/Instagram QR images the admin uploads.
+- `deliverables` — **private**. Final design files the admin uploads per order via `admin-upload-delivery.mts`. Client downloads via a signed URL (1 hour expiry) generated in `my-orders.mts`.
+- `message-attachments` — **private**. Files attached to per-order chat messages (either side). Signed URLs (1 hour expiry) generated in `order-messages.mts` / `admin-order-messages.mts`.
 
 ## Backend Functions (`/netlify/functions/*.mts`)
 
-Public (no auth):
-- `submit-order.mts` — validates input, re-validates coupon server-side, looks up live price from `services` table (never trusts client price), inserts order, uploads reference file, sends 2 emails (client + owner), logs to `email_log`.
-- `track-order.mts` — requires order_number **and** matching phone (prevents guessing someone else's order by ID alone).
+Public (no auth required to call, but most require a valid Supabase client access token once inside):
+- `submit-order.mts` — validates input, re-validates coupon server-side, looks up live price from `services` table (never trusts client price), re-validates any loyalty-point redemption against the client's real balance, requires a logged-in client (verifies the Supabase access token — rejects with 401 if not logged in), inserts order, uploads reference file, sends 2 emails via Brevo (client + owner), logs to `email_log`.
+- `track-order.mts` — guest-style lookup, requires order_number **and** matching phone (prevents guessing someone else's order by ID alone). Still present alongside the logged-in My Orders flow — see ROADMAP for its status.
 - `get-site-settings.mts` — returns prices/offer/UPI/social links/services. Public and read-only by design (nothing sensitive).
 - `validate-coupon.mts` — coupon check used for the live "Apply" button on the order form (submit-order re-validates independently — this one is just for UX feedback).
 - `admin-login.mts` — rate-limited, generic error message on failure, issues a signed session token (HMAC-SHA256, `ADMIN_SESSION_SECRET`), no forgot-password flow (single fixed admin, reset happens directly in DB if ever needed).
 - `get-order-total.mts` — public, returns only order_number/service/quantity/total_price/payment_status for the Payment page (deliberately excludes name/phone/email/details).
+- `my-orders.mts` — requires a logged-in client; verifies their Supabase access token server-side, then returns only their own orders (looked up with the service role key — the public site never queries `orders` directly, and this rule holds for logged-in clients too), plus a signed download URL for any order with a delivered file.
+- `book-call.mts` — requires a logged-in client; inserts a row into `call_requests` and emails the admin via Brevo.
+- `delete-account.mts` — requires a logged-in client; deletes their Supabase Auth user (their past orders keep their history, `orders.user_id` is set to null via the FK's `ON DELETE SET NULL`); emails the admin a notification.
+- `get-loyalty-points.mts` — requires a logged-in client; returns their real, server-computed loyalty point balance (see `netlify/lib/loyalty-points.mts`).
+- `get-referral-stats.mts` — requires a logged-in client; returns their referral code (deterministically derived from their user id, format `GB-XXXXXXXX`) and how many other signups used it.
+- `order-messages.mts` (GET/POST) — requires a logged-in client; confirms the order actually belongs to them before returning or accepting messages; supports an optional file attachment.
+- `request-revision.mts` — requires a logged-in client; confirms the order belongs to them before setting `revision_requested`; emails the admin.
 
 Admin-only (require a valid session token via `verify-session.mts`):
-- `admin-orders.mts` — list/search orders, generates signed reference-file URLs.
+- `admin-orders.mts` — list/search orders, generates signed reference-file URLs, and (via PATCH) updates status/payment_status, clears a revision flag, or manually triggers a review/referral-request email — sends the appropriate templated email to the client for each of these, respecting their notification preference.
 - `admin-settings.mts` — update offer/UPI/whatsapp fields (allow-listed fields only).
 - `admin-coupons.mts` — CRUD coupons.
 - `admin-services.mts` — CRUD services (auto-generates a unique `service_key` slug from the name).
 - `admin-social-links.mts` — add/list/delete social links.
 - `admin-upload-qr.mts` — uploads a QR image to the `qr-codes` bucket and updates `site_settings`.
 - `admin-send-email.mts` — sends a free-text custom email to a client for a given order.
+- `admin-call-requests.mts` — list call requests and update their status (e.g. mark contacted/done).
+- `admin-order-messages.mts` — GET/POST the admin side of a per-order chat thread; emails the client if their notification preference allows it.
+- `admin-upload-delivery.mts` — uploads a final file to the `deliverables` bucket for an order, links it on the order row, and emails the client that their files are ready.
 
 ## Session/Auth Model
 
-There is **no** Supabase Auth in use yet (as of this writing) — the admin login is a custom system:
+There are now **two separate, non-interchangeable auth systems** in this project:
+
+**1. Admin auth (custom, unchanged):**
 1. `verify_admin_login()` Postgres function compares password hash inside the DB.
 2. On success, `admin-login.mts` issues a stateless signed token: `base64url(json).signature`, HMAC-SHA256 with `ADMIN_SESSION_SECRET`, 6-hour expiry.
 3. Frontend stores it in `localStorage` (`gd_admin_token`).
 4. Every admin function independently re-verifies the token server-side via `verify-session.mts` — the frontend guard is not the real security boundary, the backend check is.
 
-**Planned but not yet built:** a client-facing account system using actual Supabase Auth (with Google OAuth) — see `ROADMAP.md`. That will be the first real use of Supabase Auth in this project; it's a deliberate architectural addition, not a replacement of the admin auth system above.
+**2. Client auth (real Supabase Auth — now live, not just planned):**
+1. `login.html` offers Google OAuth (`sb.auth.signInWithOAuth`) and a passwordless email magic link (`sb.auth.signInWithOtp`, `shouldCreateUser: true` — first login also creates the account, no separate signup flow needed).
+2. The Supabase JS client (anon key, safe to expose) manages the session in the browser directly.
+3. Every backend function that needs to trust a client's identity — `submit-order.mts`, `my-orders.mts`, `book-call.mts`, `delete-account.mts`, `get-loyalty-points.mts`, `get-referral-stats.mts`, `order-messages.mts`, `request-revision.mts` — takes the `Authorization: Bearer <access_token>` header the frontend sends and independently verifies it against `${SUPABASE_URL}/auth/v1/user` using the service role key. A user id is never trusted if it's merely sent as a form field or JSON body value.
+4. Placing an order requires being logged in — `order.html` only shows the order form after confirming a session exists, and `submit-order.mts` rejects with 401 server-side if no valid access token is present, so this can't be bypassed by posting directly to the API.
+5. Referral capture: a `?ref=CODE` URL parameter is stashed in `localStorage` on `login.html` before login, then written to `user_metadata.referred_by` once on first visit to `account.html` after a successful login (never overwritten, and a user can't credit their own code to themselves).
 
 ## Environment Variables (set in Netlify, never in code)
 
-`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `ADMIN_SESSION_SECRET` — names only, obviously never commit values. All Netlify Functions read these via `Netlify.env.get()`, never hardcoded.
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `BREVO_API_KEY`, `ADMIN_SESSION_SECRET` — names only, obviously never commit values. `ADMIN_NOTIFY_EMAIL` is optional (some functions fall back to a hardcoded admin email address if it's unset). All Netlify Functions read these via `Netlify.env.get()`, never hardcoded. **`RESEND_API_KEY` is retired and no longer referenced anywhere in the codebase** — the project switched its email provider to Brevo (see `CHANGELOG.md`).
 
 ## Security Checklist Applied
 
 - RLS on every table, no public policies — service role only.
 - Coupon discount and price are always recalculated server-side, never trusted from the browser.
+- Loyalty point redemption is always re-validated against the client's real, server-computed balance — never trusted from the browser.
 - Track Order requires two matching pieces of info (order number + phone), not just a guessable ID.
+- Every client-facing function that touches personal data or another table verifies the Supabase access token server-side and confirms row ownership (e.g. an order actually belongs to the requesting user) before reading or writing anything.
 - Admin password never compared in JS — only inside a Postgres `security definer` function, and that function's `EXECUTE` privilege is revoked from `anon`/`authenticated` roles (only `service_role` can call it).
-- Reference files are in a private bucket, served via time-limited signed URLs only.
+- Reference files, delivered final files, and message attachments are all in private buckets, served via time-limited signed URLs only.
