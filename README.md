@@ -11,14 +11,15 @@
 
 ## What This Is
 
-A full order-management website for a solo freelance graphic designer. Clients browse services, place an order, pay via UPI, and track status. The owner manages everything (orders, pricing, coupons, social links) from a password-protected Admin Dashboard — no code changes needed for day-to-day business operations.
+A full order-management website for a solo freelance graphic designer, with a client account system layered on top. Clients create an account (Google OAuth or passwordless email link), browse services, place an order, pay via UPI, and track everything from a personal account hub — order history, file downloads, revision requests, messaging with the designer, loyalty points, and referrals. Placing an order requires being logged in (no guest checkout). The owner manages everything (orders, pricing, coupons, social links, call requests, deliveries) from a password-protected Admin Dashboard — no code changes needed for day-to-day business operations.
 
 ## Tech Stack
 
 - **Frontend:** Plain HTML + CSS + vanilla JavaScript. No framework. Each page is a single self-contained `.html` file (styles and scripts inline).
 - **Backend:** Netlify Functions (`.mts`, TypeScript, Deno runtime, standard Fetch API `Request`/`Response`).
-- **Database + Storage + Auth (planned):** Supabase (Postgres).
-- **Email:** Resend API.
+- **Database + Storage:** Supabase (Postgres).
+- **Client Auth:** Supabase Auth — Google OAuth and passwordless email magic link (OTP). Live and in use (see `ARCHITECTURE.md` for how this differs from the separate admin login system).
+- **Email:** Brevo API (switched from Resend — see `CHANGELOG.md`).
 - **Hosting:** Netlify, auto-deploys from this repo's `main` branch (GitHub → Netlify continuous deployment).
 
 ## Design System
@@ -33,15 +34,26 @@ A full order-management website for a solo freelance graphic designer. Clients b
 /                           → all frontend pages (flat, not in a subfolder)
   index.html                → Home
   about.html                → About + FAQ + Refund/Terms
-  order.html                → Order form (coupon, quantity, dynamic services)
+  order.html                → Order form (coupon, quantity, dynamic services) — requires login
   portfolio.html             → Portfolio gallery (images embedded as base64)
-  track-order.html          → Order ID + phone lookup
+  track-order.html          → Guest order lookup (Order ID + phone) — still present alongside My Orders, not yet retired (see ROADMAP)
   payment.html               → UPI QR/ID display
+  login.html                → Client login/signup (Google OAuth or email magic link)
+  account.html               → Client account hub — links to Profile, Orders, Settings, Billing, Activity, Refer & Earn, Help, Book a Call
+  profile.html                → Edit client name/contact/preferences
+  orders.html                  → My Orders — order history, file downloads, revision requests, per-order messaging with the designer
+  settings.html                 → Notification preferences, self-service account deletion
+  billing.html                   → Billing & invoice list
+  invoice.html                    → Single invoice view
+  activity.html                    → Client activity log
+  refer.html                        → Refer & Earn — client's referral code and referral count
+  call.html                          → Book a call with the designer
+  help.html                          → Help & support
   admin-login.html          → Admin login (no public nav link to this page)
-  admin.html                → Admin Dashboard (tabs: Orders, Pricing, Coupons, Payment & Social)
+  admin.html                → Admin Dashboard (tabs: Orders, Pricing, Coupons, Payment & Social, Call Requests, and per-order messaging/delivery upload)
   netlify.toml               → tells Netlify where functions live
 /netlify/functions/*.mts    → all backend endpoints (see ARCHITECTURE.md)
-/netlify/lib/verify-session.mts → shared session-token verification helper
+/netlify/lib/*.mts          → shared helpers — session verification, Brevo email sending, loyalty point calculation, notification preference lookup
 ```
 
 ## Where To Look Next
@@ -54,5 +66,6 @@ A full order-management website for a solo freelance graphic designer. Clients b
 
 1. **Supabase free-tier auto-pauses the database after ~7 days of inactivity.** If nothing is working, check project status first — it may just need `restore_project`.
 2. **Netlify free plan has a monthly credit limit.** Every push to `main` triggers an auto-deploy, which spends credits. Batch changes before pushing when possible, or disable auto-publishing and trigger deploys manually.
-3. **Environment variable names are case-sensitive.** `RESEND_API_KEY` must be exactly that — a lowercase `resend_api_key` will silently break email sending with no obvious error.
+3. **Environment variable names are case-sensitive.** `BREVO_API_KEY` must be exactly that — a wrong-case variant will silently break email sending with no obvious error. (This project switched from Resend to Brevo — `RESEND_API_KEY` is no longer used anywhere in the codebase.)
 4. This repo's working copy is periodically re-fetched from GitHub because the assistant's local sandbox resets between sessions — **GitHub `main` is the real source of truth**, not any local copy.
+5. **Two separate auth systems exist and are not interchangeable:** the admin login (custom HMAC-signed session token) and the client login (real Supabase Auth). Don't confuse an admin session token with a client Supabase access token when debugging.
