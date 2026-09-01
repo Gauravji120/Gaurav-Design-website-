@@ -32,6 +32,7 @@ Test the specific flow your change affects, but if the change touches shared cod
 - [ ] Order confirmation email arrives (client) and alert email arrives (admin)
 - [ ] Payment page shows the exact order total
 - [ ] "Pause new orders" toggle actually hides the form and blocks direct API submission (503)
+- [ ] **Draft auto-save:** start filling the order form (size/deadline/details), refresh the page — a "Resume draft / Start fresh" banner appears; Resume refills the fields, Start fresh clears them. Submit successfully — the draft is gone on the next visit. Force a failed submission (e.g. disconnect network) — the typed values and the saved draft both remain so retrying doesn't require retyping. Confirm a different logged-in account never sees another account's draft on the same browser. Clicking "Reorder" from My Orders takes priority over any saved draft and replaces it.
 
 ### My Orders / Order Lifecycle
 - [ ] Client sees only their own orders, never someone else's
