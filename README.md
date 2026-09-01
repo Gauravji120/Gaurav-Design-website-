@@ -60,7 +60,13 @@ A full order-management website for a solo freelance graphic designer, with a cl
 
 - **`ARCHITECTURE.md`** — database schema, every backend function, environment variables, security model.
 - **`ROADMAP.md`** — what's built vs. what's still planned, with priority.
-- **`CHANGELOG.md`** — dated history of what changed.
+- **`CHANGELOG.md`** — history of what changed (entries are not currently dated — see note in that file).
+- **`API-ENDPOINTS.md`** — list of backend endpoints and what each does.
+- **`TESTING.md`** — manual testing checklist (no automated tests exist yet); also points to `INCIDENT-LOG.md` for post-incident write-ups.
+- **`INCIDENT-LOG.md`** — dated record of production incidents and their root causes.
+- **`ENVIRONMENT-VARIABLES.md`** — required env vars and naming gotchas.
+- **`AI-CODING-GUIDELINES.md`** — house rules for AI-assisted changes to this codebase.
+- **`Safety and security.md`** — security checklist and what's still outstanding (e.g. `_headers` file, admin audit logging).
 
 ## Known Operational Gotchas (Read Before Debugging)
 
