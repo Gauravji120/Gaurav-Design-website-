@@ -68,6 +68,7 @@ A full order-management website for a solo freelance graphic designer, with a cl
 - **`AI-CODING-GUIDELINES.md`** — house rules for AI-assisted changes to this codebase.
 - **`Safety and security.md`** — security checklist and what's still outstanding (e.g. `_headers` file, admin audit logging).
 - **`SEO.md`** — full SEO plan (technical SEO, Google Business Profile, on-page keywords, structured data, off-page) — nothing implemented in code yet, this is the plan to follow.
+- **`APP-COMPLETENESS-CHECKLIST.md`** — reliability/UX gaps not covered by feature work: empty/error/loading/network states, admin password reset, analytics, crash reporting, onboarding, accessibility. Nothing implemented in code yet.
 
 ## Known Operational Gotchas (Read Before Debugging)
 
