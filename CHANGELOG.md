@@ -2,6 +2,18 @@
 
 History of what was built, newest first. **Note: entries here are not currently timestamped with actual dates** — this is a known documentation gap (see `README.md`). If a real date for a past entry becomes known, add it; otherwise don't guess one. For a properly dated record specifically for production incidents, see `INCIDENT-LOG.md`. New entries added to this file going forward should include a real date if known at the time of writing.
 
+## Security Fixes: RLS Gap + Missing Brute-Force Table (2026-08-31)
+
+Triggered by a Supabase security-advisor email flagging RLS disabled on a table.
+
+**Fixed**
+- **Critical:** `reviews`, `call_requests`, `rate_limit_log`, and `order_messages` had Row Level Security fully **disabled** — any client with the project's anon key could have read/written every row directly, bypassing the Netlify Functions layer entirely. Enabled RLS on all 4 (no public policies, matching every other table — service-role-only access per the documented architecture). Only `order_messages` had real data in it (15 rows) at the time this was found; no evidence of actual exploitation, just an open door.
+- **Broken since it was first documented:** `admin_login_attempts` — the table this project's `CHANGELOG.md` (see "Admin Dashboard Build" below) says was created alongside `admin-login.mts` did not actually exist in the database. `admin-login.mts` queries it for brute-force lockout (6 failed attempts / 15 min); since the table was missing, that query silently failed, the failed-attempt count always read as 0, and the lockout never triggered — admin login had **no real rate limiting** in production. Recreated the table (`username`, `success`, `created_at`, indexed) with RLS enabled.
+
+**Also checked, found already correct:** storage bucket public/private flags, `verify_admin_login()` execute privileges (service-role only) and `search_path` pinning on all 3 Postgres functions, no hardcoded secrets in function source.
+
+**Still open (not fixable via SQL/API — requires the Supabase Dashboard):** "Leaked password protection" (HaveIBeenPwned check) is off under Authentication settings. Low priority since client login is Google OAuth + magic link, not passwords — but worth turning on before ever adding password-based signup.
+
 ## Order Form: Draft Auto-Save
 
 **Added**
