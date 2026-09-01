@@ -26,6 +26,7 @@
 - [x] Call booking — client requests a call from the account hub; admin manages requests from the dashboard
 - [x] Notification preferences — client can choose all / important-only / none for order-status emails
 - [x] Switched transactional email provider: Resend → Brevo
+- [x] Order form draft auto-save (localStorage) — size/deadline/details/service/quantity/delivery method/coupon are saved as the client types, survive an accidental refresh/close, and offer a Resume/Start Fresh choice on return; cleared only after a successful submit, kept on a failed one
 
 ## 🔧 Tech Debt / Cleanup
 
@@ -65,6 +66,7 @@
 - [ ] Rush order option
 - [ ] Order edit/cancel window (~5 min after submit)
 - [ ] "Request similar design" button from portfolio
+- [ ] **Profile auto-save (next up):** save the delivery method and last-used size/platform to the client's profile after an order (with a "remember this for next time" checkbox), so returning clients see them pre-filled — same idea as the draft auto-save above, but for details that repeat across orders rather than one in-progress order. Requires new fields on the Supabase Auth `user_metadata` and a small order-form change to read/write them.
 
 ## 🟢 Payment & Pricing
 
@@ -112,7 +114,6 @@
 - [ ] Skeleton loading states
 - [ ] Instant click feedback on buttons
 - [ ] Sticky "Order Now" button on mobile
-- [ ] Form draft auto-save (localStorage)
 - [ ] Larger tap targets / no auto-zoom on mobile inputs
 - [ ] Contrast/accessibility pass
 - [ ] "Recently viewed" portfolio section
