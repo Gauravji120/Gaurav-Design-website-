@@ -32,16 +32,18 @@
 - [ ] `track-order.html` / `track-order.mts` (guest lookup by Order ID + phone) is still present alongside My Orders. Decide: keep as a fallback for people who don't want an account, or retire it now that ordering requires login anyway.
 - [ ] `site_settings` still has unused `price_poster`/`price_thumbnail`/`price_packaging`/`price_book` columns left over from before the dynamic `services` table — safe to drop whenever convenient.
 
-## 🔴 High Priority — Not Started
+## 🔴 High Priority — On Hold (owner's call, not being worked on right now)
 
-- [ ] **Real UPI QR code + UPI ID** (payment page still shows a labeled sample/placeholder)
+- [ ] **Real UPI QR code + UPI ID** (payment page still shows a labeled sample/placeholder) — deliberately parked; do not start on this without the owner asking for it explicitly.
 
-## 🛡️ Security & Performance — Found in Site Scan
+## 🛡️ Security & Performance — Found in Site Scan (active — being planned/fixed)
 
-- [ ] **`portfolio.html` is ~4.9 MB** — portfolio images are embedded as inline base64 instead of being hosted as real image files/CDN assets. This makes the page very slow to load, especially on mobile. Move images to Supabase Storage (or another host) and reference them by URL.
-- [ ] **Admin session token stored in `localStorage`** (`gd_admin_token` in `admin-login.html`) — vulnerable to theft via XSS since it isn't an httpOnly cookie. Consider moving to an httpOnly, Secure cookie for the admin session.
+- [ ] **`portfolio.html` is ~4.9 MB** — portfolio images are embedded as inline base64 instead of being hosted as real image files/CDN assets. This makes the page very slow to load, especially on mobile. Move images to a public Supabase Storage bucket (or another CDN/host) and reference them with normal `<img src>` URLs instead. See `Safety and security.md` §5 for the detailed note.
+- [ ] **Admin session token stored in `localStorage`** (`gd_admin_token` in `admin-login.html`) — vulnerable to theft via XSS since it isn't an httpOnly cookie. Full researched plan (move to `HttpOnly`/`Secure`/`SameSite=Lax` cookie + CSRF mitigation) is written up in `Safety and security.md` §3.1 — implement from there.
+- [ ] **No security response headers configured** — Netlify doesn't add CSP/X-Frame-Options/HSTS by default. A ready-to-use starter `_headers` file (with a Supabase- and inline-CSS-aware Content-Security-Policy) is written up in `Safety and security.md` §6 — copy it in once the production domain is finalized, starting with `Content-Security-Policy-Report-Only` before enforcing it.
+- [ ] **Zero automated tests** — everything is manually checked against `TESTING.md`'s checklist. A scoped plan for a small Playwright smoke-test suite (5–8 tests covering the highest-value flows, no CI required to start) is written up in `TESTING.md` under "Adding Automated Smoke Tests."
 - [ ] **Emoji icons not actually migrated yet** — `EMOJI-TO-SVG-MIGRATION.md` says only `index.html` and `about.html` were checked, but emoji (🌙 ☀️ ☰ ✕ 👁 🙈) are still present in both of those plus `404.html` and `admin-login.html`. The migration hasn't been implemented on any page yet, only planned.
-- [ ] **Leftover old-brand localStorage key names** — `gd-theme` (dark mode) and `gd_admin_token` (admin session) still use the pre-rebrand "gd" prefix from "Gaurav Design". Not broken, just inconsistent with the "Going Beyond" rebrand; rename if convenient (remember to migrate/ignore old stored values).
+- [ ] **Leftover old-brand localStorage key names** — `gd-theme` (dark mode) and `gd_admin_token` (admin session) still use the pre-rebrand "gd" prefix from "Gaurav Design". Not broken, just inconsistent with the "Going Beyond" rebrand; rename if convenient (remember to migrate/ignore old stored values — this is a good one to batch together with the admin-cookie migration above since both touch `gd_admin_token`).
 - [ ] **No shared JS/CSS file** — theme toggle and other repeated logic is copy-pasted inline into every page instead of a shared `/assets` file. Not urgent, but makes future changes (e.g. the localStorage key rename above) require editing every page individually.
 
 ## 🟡 New Services To Add (no code needed — just use the Admin Dashboard)
