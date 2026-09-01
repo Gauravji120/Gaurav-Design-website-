@@ -76,6 +76,12 @@
   .btn:disabled{opacity:.6; cursor:not-allowed; transform:none;}
   .form-note{font-size:.78rem; color:var(--ink-soft); margin-top:14px;}
 
+  .draft-banner{display:none; background:var(--paper-alt); border:1px solid var(--stamp-mustard); border-left:4px solid var(--stamp-mustard); padding:16px 18px; margin-bottom:20px; font-size:.88rem;}
+  .draft-banner p{color:var(--ink-soft); margin-top:4px; font-size:.82rem;}
+  .draft-actions{display:flex; gap:10px; margin-top:12px;}
+  .draft-actions button{padding:9px 16px; font-size:.8rem; font-weight:700; border:none; cursor:pointer; border-radius:2px; font-family:var(--sans);}
+  .draft-actions .btn-resume{background:var(--stamp-mustard); color:#fff;}
+  .draft-actions .btn-discard{background:transparent; border:1px solid var(--line); color:var(--ink);}
 
   .success-card{
     background:var(--white); border:1px solid var(--ledger-green); padding:40px 30px; text-align:center;
@@ -116,6 +122,15 @@
 
 <div class="form-wrap" id="formWrap" style="display:none;">
   <div id="ordersPausedBox" style="display:none; background:var(--paper-alt); border:1px solid var(--carbon-red); border-left:4px solid var(--carbon-red); padding:20px; text-align:center; font-size:.95rem; margin-bottom:20px;"></div>
+
+  <div class="draft-banner" id="draftBanner">
+    <strong>You have an unfinished order from earlier.</strong>
+    <p>Pick up where you left off, or start a fresh form.</p>
+    <div class="draft-actions">
+      <button type="button" class="btn-resume" id="draftResumeBtn">Resume draft</button>
+      <button type="button" class="btn-discard" id="draftDiscardBtn">Start fresh</button>
+    </div>
+  </div>
 
   <form class="form-card" name="order" id="orderForm" enctype="multipart/form-data">
     <p style="display:none;"><label>Don't fill this: <input name="bot-field"></label></p>
@@ -263,6 +278,60 @@
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   let currentSession = null;
 
+  // ---- Draft auto-save: protects typed order details from an accidental
+  // refresh/close. Scoped per logged-in user id so a shared browser never
+  // shows one client's draft to another. ----
+  function draftKeyFor(userId){ return `gb_order_draft_${userId}`; }
+
+  function collectDraftData(){
+    const opt = serviceSelect.selectedOptions[0];
+    return {
+      serviceKey: opt ? (opt.getAttribute('data-key') || '') : '',
+      quantity: quantitySelect.value,
+      size: orderForm.elements['size'].value,
+      deadline: orderForm.elements['deadline'].value,
+      details: orderForm.elements['details'].value,
+      deliveryMethod: orderForm.querySelector('input[name="deliveryMethod"]:checked')?.value || 'Email',
+      couponCode: couponInput.value
+    };
+  }
+
+  function saveDraft(){
+    if (!currentSession) return;
+    try { localStorage.setItem(draftKeyFor(currentSession.user.id), JSON.stringify(collectDraftData())); } catch(e){}
+  }
+
+  function loadDraft(){
+    if (!currentSession) return null;
+    try {
+      const raw = localStorage.getItem(draftKeyFor(currentSession.user.id));
+      return raw ? JSON.parse(raw) : null;
+    } catch(e){ return null; }
+  }
+
+  function clearDraft(){
+    if (!currentSession) return;
+    try { localStorage.removeItem(draftKeyFor(currentSession.user.id)); } catch(e){}
+  }
+
+  function applyDraftToForm(draft){
+    if (!draft) return;
+    if (draft.serviceKey) {
+      const match = [...serviceSelect.options].find(o => o.getAttribute('data-key') === draft.serviceKey);
+      if (match) serviceSelect.value = match.value;
+    }
+    if (draft.quantity) quantitySelect.value = draft.quantity;
+    if (draft.size) orderForm.elements['size'].value = draft.size;
+    if (draft.deadline) orderForm.elements['deadline'].value = draft.deadline;
+    if (draft.details) orderForm.elements['details'].value = draft.details;
+    if (draft.deliveryMethod) {
+      const radio = orderForm.querySelector(`input[name="deliveryMethod"][value="${draft.deliveryMethod}"]`);
+      if (radio) radio.checked = true;
+    }
+    if (draft.couponCode) couponInput.value = draft.couponCode;
+    updatePricePreview();
+  }
+
   (async function authGate(){
     const { data } = await sb.auth.getSession();
     if (!data.session) {
@@ -299,7 +368,14 @@
       document.getElementById('pointsError').textContent = '';
     });
 
-    // If the client clicked "Reorder" on My Account, prefill this form from that order
+    // Wait for the live services list to finish loading before trying to
+    // pre-select a service by key (reorder or draft) — the dropdown options
+    // aren't ready until this resolves.
+    await liveServicesPromise;
+
+    // If the client clicked "Reorder" on My Account, prefill this form from
+    // that order. A reorder is a deliberate fresh action, so it takes
+    // priority over any saved draft (and replaces it).
     const reorderRaw = sessionStorage.getItem('gb_reorder');
     if (reorderRaw) {
       try {
@@ -310,7 +386,33 @@
         if (r.details) document.querySelector('textarea[name="details"]').value = r.details;
       } catch {}
       sessionStorage.removeItem('gb_reorder');
+      clearDraft();
+    } else {
+      const draft = loadDraft();
+      if (draft && (draft.size || draft.details || draft.serviceKey)) {
+        document.getElementById('draftBanner').style.display = 'block';
+        document.getElementById('draftResumeBtn').addEventListener('click', () => {
+          applyDraftToForm(draft);
+          document.getElementById('draftBanner').style.display = 'none';
+        });
+        document.getElementById('draftDiscardBtn').addEventListener('click', () => {
+          clearDraft();
+          document.getElementById('draftBanner').style.display = 'none';
+        });
+      }
     }
+
+    // Start autosaving from here on — every change to a tracked field is
+    // saved to localStorage so an accidental refresh/close doesn't lose
+    // typed work. (The reference file can't be saved this way and needs to
+    // be reattached if a draft is resumed.)
+    ['size', 'deadline', 'details'].forEach(name => {
+      orderForm.elements[name].addEventListener('input', saveDraft);
+    });
+    serviceSelect.addEventListener('change', saveDraft);
+    quantitySelect.addEventListener('change', saveDraft);
+    orderForm.querySelectorAll('input[name="deliveryMethod"]').forEach(r => r.addEventListener('change', saveDraft));
+    couponInput.addEventListener('input', saveDraft);
   })();
 
   const toggle = document.getElementById('themeToggle');
@@ -332,7 +434,7 @@
 
   // Build the service list dynamically from the database so any service the
   // admin adds automatically shows up here — no code changes needed.
-  (async function loadLiveServices(){
+  const liveServicesPromise = (async function loadLiveServices(){
     try {
       const res = await fetch('/api/site-settings');
       if (!res.ok) return;
@@ -530,6 +632,10 @@
         throw new Error(data.error || 'Could not save order');
       }
 
+      // Order saved successfully — clear the saved draft so it doesn't
+      // reappear on this client's next visit.
+      clearDraft();
+
       // Show success with the real, server-generated Order ID
       document.getElementById('orderIdBox').textContent = data.orderNumber;
       if (data.appliedCouponCode && data.appliedDiscountPercent) {
@@ -547,6 +653,8 @@
       document.getElementById('successCard').style.display = 'block';
 
     } catch (err) {
+      // Submission failed — deliberately do NOT clear the draft here, so the
+      // client's typed details are still there to retry with.
       console.error('Order save failed:', err);
       document.getElementById('formErrorNote').style.display = 'block';
       submitBtn.disabled = false;
