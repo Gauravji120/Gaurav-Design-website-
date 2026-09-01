@@ -69,3 +69,22 @@ Test the specific flow your change affects, but if the change touches shared cod
 
 - If a bug is found and fixed, add an entry to `CHANGELOG.md` and, if it was a real production issue, to `INCIDENT-LOG.md` with the root cause.
 - Confirm the Netlify deploy after pushing actually picked up the expected number of functions (a known past failure mode — see `CHANGELOG.md`'s Core Backend Build entry).
+
+## Adding Automated Smoke Tests — Planned, Not Yet Done
+
+This project currently has zero automated tests, which means every regression above is only caught if a human remembers to click through it by hand. A full test suite isn't realistic for a solo-maintained project, but a **small Playwright smoke-test script** covering just the highest-value flows would catch the most common breakages (a page that 404s, a login flow that silently stops working, an order form that fails to submit) without much ongoing maintenance burden.
+
+Suggested starting scope (5–8 tests, not full coverage):
+1. Home page loads and shows live pricing (catches the exact "pricing invisible" bug already recorded in `CHANGELOG.md`).
+2. Login page loads and the email-magic-link form submits without a client-side error.
+3. Order page redirects to login when logged out.
+4. 404 page renders correctly for an unknown URL.
+5. Admin login page loads and rejects an invalid login with a visible error message.
+
+How to run this without adding a build step:
+- Add Playwright as a dev dependency (`npm i -D @playwright/test`) in a new `package.json` scoped just to testing — it doesn't need to affect the Netlify deploy, since these pages are static and functions are TypeScript/Deno already.
+- Point the tests at the **live or a Netlify deploy-preview URL** (`PLAYWRIGHT_BASE_URL`) rather than trying to run Supabase/Netlify Functions locally — simplest for a project with no local dev server.
+- Run manually (`npx playwright test`) before a push that touches shared/critical code, and optionally wire it into a GitHub Actions workflow later so it runs automatically on push to `main`. This is optional infra, not required to ship the tests themselves.
+- Keep tests read-only against production data where possible (e.g. don't actually submit a real order in the smoke test) to avoid polluting the live database; use a dedicated test account/coupon if a flow must be exercised end-to-end.
+
+This is tracked as a checklist item in `ROADMAP.md`.
