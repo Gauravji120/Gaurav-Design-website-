@@ -1,6 +1,6 @@
 # Changelog
 
-Dated history of what was built. Newest first.
+History of what was built, newest first. **Note: entries here are not currently timestamped with actual dates** — this is a known documentation gap (see `README.md`). If a real date for a past entry becomes known, add it; otherwise don't guess one. For a properly dated record specifically for production incidents, see `INCIDENT-LOG.md`. New entries added to this file going forward should include a real date if known at the time of writing.
 
 ## Client Account System + Retention & Delivery Feature Batch
 
