@@ -36,6 +36,14 @@
 
 - [ ] **Real UPI QR code + UPI ID** (payment page still shows a labeled sample/placeholder)
 
+## 🛡️ Security & Performance — Found in Site Scan
+
+- [ ] **`portfolio.html` is ~4.9 MB** — portfolio images are embedded as inline base64 instead of being hosted as real image files/CDN assets. This makes the page very slow to load, especially on mobile. Move images to Supabase Storage (or another host) and reference them by URL.
+- [ ] **Admin session token stored in `localStorage`** (`gd_admin_token` in `admin-login.html`) — vulnerable to theft via XSS since it isn't an httpOnly cookie. Consider moving to an httpOnly, Secure cookie for the admin session.
+- [ ] **Emoji icons not actually migrated yet** — `EMOJI-TO-SVG-MIGRATION.md` says only `index.html` and `about.html` were checked, but emoji (🌙 ☀️ ☰ ✕ 👁 🙈) are still present in both of those plus `404.html` and `admin-login.html`. The migration hasn't been implemented on any page yet, only planned.
+- [ ] **Leftover old-brand localStorage key names** — `gd-theme` (dark mode) and `gd_admin_token` (admin session) still use the pre-rebrand "gd" prefix from "Gaurav Design". Not broken, just inconsistent with the "Going Beyond" rebrand; rename if convenient (remember to migrate/ignore old stored values).
+- [ ] **No shared JS/CSS file** — theme toggle and other repeated logic is copy-pasted inline into every page instead of a shared `/assets` file. Not urgent, but makes future changes (e.g. the localStorage key rename above) require editing every page individually.
+
 ## 🟡 New Services To Add (no code needed — just use the Admin Dashboard)
 
 - [ ] Business Cards
