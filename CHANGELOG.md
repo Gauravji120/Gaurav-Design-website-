@@ -2,6 +2,17 @@
 
 History of what was built, newest first. **Note: entries here are not currently timestamped with actual dates** — this is a known documentation gap (see `README.md`). If a real date for a past entry becomes known, add it; otherwise don't guess one. For a properly dated record specifically for production incidents, see `INCIDENT-LOG.md`. New entries added to this file going forward should include a real date if known at the time of writing.
 
+## Order Form: Draft Auto-Save
+
+**Added**
+- `order.html` now auto-saves the in-progress order (service, quantity, size, deadline, details, delivery method, coupon code) to `localStorage` as the client types, keyed per logged-in user id (`gb_order_draft_<user_id>`) so a shared browser never shows one client's draft to another
+- If a saved draft is found on return to the page, a banner offers **Resume draft** (refills the form) or **Start fresh** (discards it) — a client's own explicit "Reorder" action from My Orders always takes priority over a stale draft and replaces it
+- The draft is cleared automatically only after a successful order submission; if submission fails (e.g. a network error), the draft — and the form's own typed values — are deliberately left in place so nothing has to be retyped to retry
+- The reference-file attachment is not covered by this (files can't be stored in `localStorage`) — a client resuming a draft will need to reattach it
+
+**Changed**
+- `loadLiveServices()` (fetches the live service list for the dropdown) is now exposed as an awaited promise (`liveServicesPromise`) so the draft-restore and reorder logic can wait for the dropdown to be populated before trying to pre-select a service by its `service_key`, instead of racing it
+
 ## Client Account System + Retention & Delivery Feature Batch
 
 **Added**
