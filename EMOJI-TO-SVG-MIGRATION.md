@@ -15,24 +15,26 @@ An inline SVG, by contrast, is drawn by the browser from code the site controls 
 
 ## 2. Emoji Found In This Repo (confirmed so far)
 
-These were found in `index.html` and `about.html`, and the same header/footer pattern is repeated on every page per `README.md`, so the same emoji likely appear across most `.html` files:
+**Status: nothing has been migrated yet — this whole section is still an open audit, not a completed one.** Confirmed emoji, page by page:
 
-| Emoji | Used for | Where seen |
+| Emoji | Used for | Confirmed in |
 |---|---|---|
-| 🌙 | Dark/light theme toggle button (light mode state) | `index.html`, `about.html`, likely all pages |
-| ☀️ | Dark/light theme toggle button (dark mode state) | `index.html`, `about.html`, likely all pages |
+| 🌙 | Dark/light theme toggle button (light mode state) | `index.html`, `404.html`, and by extension likely every other page sharing the same header pattern |
+| ☀️ | Dark/light theme toggle button (dark mode state) | `index.html`, `404.html`, likely all pages |
 | ☰ | Hamburger menu open button | `index.html` |
 | ✕ | Menu close button | `index.html` |
+| 👁 | Show-password toggle (admin login form) | `admin-login.html` |
+| 🙈 | Hide-password toggle (admin login form, after clicking 👁) | `admin-login.html` |
 
-**Before implementing:** do a full pass across every `.html` file to confirm the complete list, since only two pages were checked here.
+**Before implementing:** only `index.html`, `404.html`, and `admin-login.html` have actually been checked so far, out of ~23 HTML files. Do a full pass across every remaining `.html` file to confirm the complete list before starting the SVG swap — there are very likely more theme-toggle emoji instances on pages not yet audited (about.html, login.html, order.html, and the rest of the account/admin pages).
 
 ## 3. Migration Plan
 
-1. Audit every `.html` file for emoji characters used as UI icons (buttons, indicators) — this repo has ~29 HTML files, most sharing the same header/menu markup, so most occurrences will repeat the same handful of emoji.
+1. Audit every `.html` file for emoji characters used as UI icons (buttons, indicators) — this repo has ~23 HTML files, most sharing the same header/menu markup, so most occurrences will repeat the same handful of emoji.
 2. For each emoji, pick one clear, simple SVG icon (see starter snippets below) rather than an overly detailed illustration — this matches the site's plain, functional design system.
 3. Use `fill="currentColor"` (or `stroke="currentColor"` for line icons) so the icon inherits the button's text color and automatically adapts between `[data-theme="light"]` and `[data-theme="dark"]`.
 4. Replace one page first (e.g. `about.html`), verify visually in both themes, confirm the toggle/menu JS logic still works (some JS currently sets `toggle.textContent = '🌙'` — this needs to change to swapping an SVG or toggling a CSS class instead of setting text).
-5. Once confirmed, apply the same change to the remaining pages that share the same header markup.
+5. Once confirmed, apply the same change to the remaining pages that share the same header markup, and to `admin-login.html`'s password show/hide toggle separately (see the 👁/🙈 icon below).
 6. Do a final check per `AI-CODING-GUIDELINES.md`: the diff size should roughly match the number of icons changed — this is a like-for-like swap, not a redesign, so no new dependencies or build steps should be introduced.
 
 ## 4. Starter SVG Snippets
@@ -75,6 +77,22 @@ Simple line-style icons matching the site's minimal aesthetic. All use `currentC
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
   <line x1="18" y1="6" x2="6" y2="18"/>
   <line x1="6" y1="6" x2="18" y2="18"/>
+</svg>
+```
+
+**Eye / show password (replaces 👁):**
+```html
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+  <circle cx="12" cy="12" r="3"/>
+</svg>
+```
+
+**Eye-off / hide password (replaces 🙈):**
+```html
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.6 18.6 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+  <line x1="1" y1="1" x2="23" y2="23"/>
 </svg>
 ```
 
