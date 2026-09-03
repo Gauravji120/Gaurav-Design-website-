@@ -27,6 +27,8 @@
 - [x] Notification preferences — client can choose all / important-only / none for order-status emails
 - [x] Switched transactional email provider: Resend → Brevo
 - [x] Order form draft auto-save (localStorage) — size/deadline/details/service/quantity/delivery method/coupon are saved as the client types, survive an accidental refresh/close, and offer a Resume/Start Fresh choice on return; cleared only after a successful submit, kept on a failed one
+- [x] `sitemap.xml` — lists public pages (home, order, portfolio, about, track-order, terms, privacy, refund) for Google to crawl
+- [x] `robots.txt` — disallows account/admin pages from indexing, links to `sitemap.xml`
 
 ## 🔧 Tech Debt / Cleanup
 
@@ -100,11 +102,17 @@
 
 ## 🟤 SEO & Discoverability
 
-- [ ] Sitemap.xml + robots.txt
+- [x] Sitemap.xml + robots.txt
+- [ ] Unique `<title>` + meta description per public page (in progress — SEO Step 3)
+- [ ] Canonical tags per page (SEO Step 4)
+- [ ] Favicon / app icon (SEO Step 5)
+- [ ] Move `portfolio.html` base64 images to hosted files (SEO Step 6, shared with Security & Performance section above)
+- [ ] LocalBusiness JSON-LD structured data on `index.html` (SEO Step 7)
+- [ ] Google Business Profile setup (SEO Step 8 — external, no code)
+- [ ] Google Search Console registration (SEO Step 9 — verification tag + sitemap submit)
 - [ ] Open Graph tags (share previews)
-- [ ] Favicon / app icon
 - [ ] "Install as App" (PWA)
-- [ ] Google Search Console registration
+- [ ] Visitor analytics / Google Analytics (SEO Step 10)
 - [ ] Blog / Tips section
 - [ ] **Standing rule (in effect now): every future page edit should also check/update its title + meta description**
 
