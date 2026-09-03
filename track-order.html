@@ -141,7 +141,7 @@
   const toggle = document.getElementById('themeToggle');
   const body = document.body;
   try {
-    const saved = localStorage.getItem('gd-theme');
+    const saved = localStorage.getItem('gb_theme');
     if(saved){ body.setAttribute('data-theme', saved); toggle.textContent = saved === 'dark' ? '☀️' : '🌙'; }
   } catch(e){}
   toggle.addEventListener('click', () => {
@@ -149,7 +149,7 @@
     const next = isDark ? 'light' : 'dark';
     body.setAttribute('data-theme', next);
     toggle.textContent = isDark ? '🌙' : '☀️';
-    try { localStorage.setItem('gd-theme', next); } catch(e){}
+    try { localStorage.setItem('gb_theme', next); } catch(e){}
   });
 
   const STAGES = ['Order Placed', 'Order Confirmed', 'Design in Progress', 'Review', 'Order Delivered'];
