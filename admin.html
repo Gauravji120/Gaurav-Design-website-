@@ -301,11 +301,11 @@
 
 <script>
   // ===== Session guard =====
-  const token = localStorage.getItem('gd_admin_token');
-  const tokenExp = Number(localStorage.getItem('gd_admin_token_exp') || 0);
+  const token = localStorage.getItem('gb_admin_token');
+  const tokenExp = Number(localStorage.getItem('gb_admin_token_exp') || 0);
   if (!token || Date.now() > tokenExp) {
-    localStorage.removeItem('gd_admin_token');
-    localStorage.removeItem('gd_admin_token_exp');
+    localStorage.removeItem('gb_admin_token');
+    localStorage.removeItem('gb_admin_token_exp');
     window.location.href = 'admin-login.html';
   }
 
@@ -316,8 +316,8 @@
   async function apiFetch(url, options){
     const res = await fetch(url, options);
     if (res.status === 401) {
-      localStorage.removeItem('gd_admin_token');
-      localStorage.removeItem('gd_admin_token_exp');
+      localStorage.removeItem('gb_admin_token');
+      localStorage.removeItem('gb_admin_token_exp');
       window.location.href = 'admin-login.html';
       throw new Error('Session expired');
     }
@@ -325,8 +325,8 @@
   }
 
   document.getElementById('logoutBtn').addEventListener('click', () => {
-    localStorage.removeItem('gd_admin_token');
-    localStorage.removeItem('gd_admin_token_exp');
+    localStorage.removeItem('gb_admin_token');
+    localStorage.removeItem('gb_admin_token_exp');
     window.location.href = 'admin-login.html';
   });
 
@@ -334,7 +334,7 @@
   const toggle = document.getElementById('themeToggle');
   const body = document.body;
   try {
-    const saved = localStorage.getItem('gd-theme');
+    const saved = localStorage.getItem('gb_theme');
     if(saved){ body.setAttribute('data-theme', saved); toggle.textContent = saved === 'dark' ? '☀️' : '🌙'; }
   } catch(e){}
   toggle.addEventListener('click', () => {
@@ -342,7 +342,7 @@
     const next = isDark ? 'light' : 'dark';
     body.setAttribute('data-theme', next);
     toggle.textContent = isDark ? '🌙' : '☀️';
-    try { localStorage.setItem('gd-theme', next); } catch(e){}
+    try { localStorage.setItem('gb_theme', next); } catch(e){}
   });
 
   // ===== Tabs =====
