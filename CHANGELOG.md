@@ -2,6 +2,22 @@
 
 History of what was built, newest first. **Note: entries here are not currently timestamped with actual dates** — this is a known documentation gap (see `README.md`). If a real date for a past entry becomes known, add it; otherwise don't guess one. For a properly dated record specifically for production incidents, see `INCIDENT-LOG.md`. New entries added to this file going forward should include a real date if known at the time of writing.
 
+## SEO: Sitemap + Robots.txt (2026-09-03)
+
+Started the SEO plan documented in `SEO.md`, working through it step by step.
+
+**Added**
+- `sitemap.xml` — lists all public-facing pages (home, order, portfolio, about, track-order, terms, privacy, refund) with priority weights, so Google's crawler doesn't have to guess which pages exist
+- `robots.txt` — disallows crawling of account/admin pages (`admin.html`, `admin-login.html`, `account.html`, `orders.html`, `profile.html`, `settings.html`, `billing.html`, `invoice.html`, `activity.html`, `refer.html`, `call.html`, `help.html`), and points crawlers to `sitemap.xml`
+
+**Next up (per `SEO.md`'s priority order, tracked in `ROADMAP.md`'s SEO & Discoverability section)**
+- Unique `<title>` + meta description per public page
+- Canonical tags
+- Favicon
+- Move `portfolio.html`'s base64 images to hosted files
+- LocalBusiness JSON-LD structured data
+- Google Business Profile + Search Console (external, no code)
+
 ## Security Fixes: RLS Gap + Missing Brute-Force Table (2026-08-31, re-verified 2026-09-02)
 
 Triggered by a Supabase security-advisor email flagging RLS disabled on a table.
