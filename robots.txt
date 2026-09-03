@@ -1,0 +1,15 @@
+User-agent: *
+Disallow: /admin.html
+Disallow: /admin-login.html
+Disallow: /account.html
+Disallow: /orders.html
+Disallow: /profile.html
+Disallow: /settings.html
+Disallow: /billing.html
+Disallow: /invoice.html
+Disallow: /activity.html
+Disallow: /refer.html
+Disallow: /call.html
+Disallow: /help.html
+
+Sitemap: https://goingbeyond.netlify.app/sitemap.xml
