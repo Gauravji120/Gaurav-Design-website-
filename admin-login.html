@@ -126,8 +126,8 @@
 
       // Store the session token for the Admin Dashboard to use
       try {
-        localStorage.setItem('gd_admin_token', data.token);
-        localStorage.setItem('gd_admin_token_exp', String(data.expiresAt));
+        localStorage.setItem('gb_admin_token', data.token);
+        localStorage.setItem('gb_admin_token_exp', String(data.expiresAt));
       } catch(e) {}
 
       loginBtn.textContent = 'Success — redirecting…';
