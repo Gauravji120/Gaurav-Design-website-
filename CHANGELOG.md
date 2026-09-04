@@ -2,6 +2,26 @@
 
 History of what was built, newest first. **Note: entries here are not currently timestamped with actual dates** — this is a known documentation gap (see `README.md`). If a real date for a past entry becomes known, add it; otherwise don't guess one. For a properly dated record specifically for production incidents, see `INCIDENT-LOG.md`. New entries added to this file going forward should include a real date if known at the time of writing.
 
+## SEO: Unique Title + Meta Description per Public Page (2026-09-04)
+
+Continued the SEO plan from `SEO.md` — Step 3.
+
+**Changed**
+- `order.html` — title/description now target "order custom design online" intent, mentioning posters, thumbnails, packaging, book layout, UPI payment, and order tracking
+- `about.html` — title/description now target "freelance graphic designer Delhi NCR" intent, mentioning the studio, FAQs, and terms/refund policy
+- `track-order.html` — title/description now target "track order status" intent
+- `index.html` already had a unique title/description from an earlier session, so it was left as-is
+
+**Deferred**
+- `portfolio.html` is not yet updated — see `INCIDENT-LOG.md`'s 2026-09-04 entry for why, and `ROADMAP.md`'s Security & Performance section for the plan to shrink it first (SEO Step 6) before editing its `<head>`.
+
+**Next up (per `SEO.md`'s priority order)**
+- Canonical tags (Step 4)
+- Favicon (Step 5)
+- Move `portfolio.html`'s base64 images to hosted files (Step 6)
+- LocalBusiness JSON-LD structured data (Step 7)
+- Google Business Profile + Search Console (Steps 8–9, external, no code)
+
 ## SEO: Sitemap + Robots.txt (2026-09-03)
 
 Started the SEO plan documented in `SEO.md`, working through it step by step.
@@ -9,14 +29,6 @@ Started the SEO plan documented in `SEO.md`, working through it step by step.
 **Added**
 - `sitemap.xml` — lists all public-facing pages (home, order, portfolio, about, track-order, terms, privacy, refund) with priority weights, so Google's crawler doesn't have to guess which pages exist
 - `robots.txt` — disallows crawling of account/admin pages (`admin.html`, `admin-login.html`, `account.html`, `orders.html`, `profile.html`, `settings.html`, `billing.html`, `invoice.html`, `activity.html`, `refer.html`, `call.html`, `help.html`), and points crawlers to `sitemap.xml`
-
-**Next up (per `SEO.md`'s priority order, tracked in `ROADMAP.md`'s SEO & Discoverability section)**
-- Unique `<title>` + meta description per public page
-- Canonical tags
-- Favicon
-- Move `portfolio.html`'s base64 images to hosted files
-- LocalBusiness JSON-LD structured data
-- Google Business Profile + Search Console (external, no code)
 
 ## Security Fixes: RLS Gap + Missing Brute-Force Table (2026-08-31, re-verified 2026-09-02)
 
