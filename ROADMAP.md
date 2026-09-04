@@ -29,6 +29,7 @@
 - [x] Order form draft auto-save (localStorage) — size/deadline/details/service/quantity/delivery method/coupon are saved as the client types, survive an accidental refresh/close, and offer a Resume/Start Fresh choice on return; cleared only after a successful submit, kept on a failed one
 - [x] `sitemap.xml` — lists public pages (home, order, portfolio, about, track-order, terms, privacy, refund) for Google to crawl
 - [x] `robots.txt` — disallows account/admin pages from indexing, links to `sitemap.xml`
+- [x] Unique `<title>` + meta description on `order.html`, `about.html`, `track-order.html` (`index.html` already had one; `portfolio.html` deferred until its base64 images are moved out, since the file is too large to safely edit right now)
 
 ## 🔧 Tech Debt / Cleanup
 
@@ -41,7 +42,7 @@
 
 ## 🛡️ Security & Performance — Found in Site Scan (active — being planned/fixed)
 
-- [ ] **`portfolio.html` is ~4.9 MB** — portfolio images are embedded as inline base64 instead of being hosted as real image files/CDN assets. This makes the page very slow to load, especially on mobile. Move images to a public Supabase Storage bucket (or another CDN/host) and reference them with normal `<img src>` URLs instead. See `Safety and security.md` §5 for the detailed note.
+- [ ] **`portfolio.html` is ~4.9 MB** — portfolio images are embedded as inline base64 instead of being hosted as real image files/CDN assets. This makes the page very slow to load, especially on mobile, and also blocks giving it a unique title/meta description (SEO Step 3) until it's fixed — the file is too large to safely rewrite in one piece right now. Move images to a public Supabase Storage bucket (or another CDN/host) and reference them with normal `<img src>` URLs instead. See `Safety and security.md` §5 for the detailed note.
 - [ ] **Admin session token stored in `localStorage`** (`gd_admin_token` in `admin-login.html`) — vulnerable to theft via XSS since it isn't an httpOnly cookie. Full researched plan (move to `HttpOnly`/`Secure`/`SameSite=Lax` cookie + CSRF mitigation) is written up in `Safety and security.md` §3.1 — implement from there.
 - [ ] **No security response headers configured** — Netlify doesn't add CSP/X-Frame-Options/HSTS by default. A ready-to-use starter `_headers` file (with a Supabase- and inline-CSS-aware Content-Security-Policy) is written up in `Safety and security.md` §6 — copy it in once the production domain is finalized, starting with `Content-Security-Policy-Report-Only` before enforcing it.
 - [ ] **Zero automated tests** — everything is manually checked against `TESTING.md`'s checklist. A scoped plan for a small Playwright smoke-test suite (5–8 tests covering the highest-value flows, no CI required to start) is written up in `TESTING.md` under "Adding Automated Smoke Tests."
@@ -102,9 +103,9 @@
 
 ## 🟤 SEO & Discoverability
 
-- [x] Sitemap.xml + robots.txt
-- [ ] Unique `<title>` + meta description per public page (in progress — SEO Step 3)
-- [ ] Canonical tags per page (SEO Step 4)
+- [x] Sitemap.xml + robots.txt (SEO Step 1–2)
+- [x] Unique `<title>` + meta description per public page (SEO Step 3) — done for `order.html`, `about.html`, `track-order.html`; `portfolio.html` blocked on Step 6 (see Security & Performance above)
+- [ ] Canonical tags per page (SEO Step 4 — next up)
 - [ ] Favicon / app icon (SEO Step 5)
 - [ ] Move `portfolio.html` base64 images to hosted files (SEO Step 6, shared with Security & Performance section above)
 - [ ] LocalBusiness JSON-LD structured data on `index.html` (SEO Step 7)
