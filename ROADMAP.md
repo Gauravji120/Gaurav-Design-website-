@@ -31,6 +31,7 @@
 - [x] `robots.txt` — disallows account/admin pages from indexing, links to `sitemap.xml`
 - [x] Unique `<title>` + meta description on `order.html`, `about.html`, `track-order.html` (`index.html` already had one; `portfolio.html` deferred until its base64 images are moved out, since the file is too large to safely edit right now)
 - [x] Canonical tags (`<link rel="canonical">`) on `index.html`, `order.html`, `about.html`, `track-order.html` — `portfolio.html` deferred for the same reason as its title/description
+- [x] LocalBusiness JSON-LD structured data added to `index.html` (name, description, URL, email, phone, price range, address, area served, founder)
 
 ## 🔧 Tech Debt / Cleanup
 
@@ -47,9 +48,10 @@
 - [ ] **Admin session token stored in `localStorage`** (`gd_admin_token` in `admin-login.html`) — vulnerable to theft via XSS since it isn't an httpOnly cookie. Full researched plan (move to `HttpOnly`/`Secure`/`SameSite=Lax` cookie + CSRF mitigation) is written up in `Safety and security.md` §3.1 — implement from there.
 - [ ] **No security response headers configured** — Netlify doesn't add CSP/X-Frame-Options/HSTS by default. A ready-to-use starter `_headers` file (with a Supabase- and inline-CSS-aware Content-Security-Policy) is written up in `Safety and security.md` §6 — copy it in once the production domain is finalized, starting with `Content-Security-Policy-Report-Only` before enforcing it.
 - [ ] **Zero automated tests** — everything is manually checked against `TESTING.md`'s checklist. A scoped plan for a small Playwright smoke-test suite (5–8 tests covering the highest-value flows, no CI required to start) is written up in `TESTING.md` under "Adding Automated Smoke Tests."
-- [ ] **Emoji icons not actually migrated yet** — `EMOJI-TO-SVG-MIGRATION.md` says only `index.html` and `about.html` were checked, but emoji (🌙 ☀️ ☰ ✕ 👁 🙈) are still present in both of those plus `404.html` and `admin-login.html`. The migration hasn't been implemented on any page yet, only planned.
+- [ ] **Emoji icons partially migrated** — `index.html`'s menu-open/menu-close/hamburger icons have been migrated to inline SVG, but the theme-toggle button on `index.html` now references undefined `SUN_ICON`/`MOON_ICON` constants (see the bug entry right below). `about.html`, `404.html`, and `admin-login.html` still use the original emoji (🌙 ☀️ ☰ ✕ 👁 🙈) and haven't been touched yet.
+- [ ] **`index.html` dark-mode toggle references undefined `SUN_ICON`/`MOON_ICON`** — found while adding the LocalBusiness schema (SEO Step 7). Clicking the toggle (or loading with a saved dark-mode preference) sets the button's content to the literal text `"undefined"` instead of an icon, since those two constants are never declared anywhere in the file — likely left over from an incomplete SVG migration. See `INCIDENT-LOG.md`'s 2026-09-09 entry for the fix plan (define the two SVG string constants matching the style already used for the menu icons).
 - [ ] **Leftover old-brand localStorage key names** — `gd-theme` (dark mode) and `gd_admin_token` (admin session) still use the pre-rebrand "gd" prefix from "Gaurav Design". Not broken, just inconsistent with the "Going Beyond" rebrand; rename if convenient (remember to migrate/ignore old stored values — this is a good one to batch together with the admin-cookie migration above since both touch `gd_admin_token`).
-- [ ] **No shared JS/CSS file** — theme toggle and other repeated logic is copy-pasted inline into every page instead of a shared `/assets` file. Not urgent, but makes future changes (e.g. the localStorage key rename above) require editing every page individually.
+- [ ] **No shared JS/CSS file** — theme toggle and other repeated logic is copy-pasted inline into every page instead of a shared `/assets` file. Not urgent, but makes future changes (e.g. the localStorage key rename above, or fixing the SUN_ICON/MOON_ICON bug once and having it apply everywhere) require editing every page individually.
 
 ## 🟡 New Services To Add (no code needed — just use the Admin Dashboard)
 
@@ -109,10 +111,10 @@
 - [x] Canonical tags per page (SEO Step 4) — done for `index.html`, `order.html`, `about.html`, `track-order.html`; `portfolio.html` blocked on Step 6
 - [ ] **Favicon / app icon (SEO Step 5) — PAUSED, waiting on the owner.** Owner is designing a custom brand logo/icon (matching the site's brick-red/mustard, print-stamp-inspired look) and will share the final image when ready. Do not generate a placeholder favicon in the meantime — wait for the real one.
 - [ ] Move `portfolio.html` base64 images to hosted files (SEO Step 6, shared with Security & Performance section above) — blocked on Supabase connector access, see note above
-- [ ] LocalBusiness JSON-LD structured data on `index.html` (SEO Step 7 — next up, does not depend on the logo or Supabase access)
-- [ ] Google Business Profile setup (SEO Step 8 — external, no code)
+- [x] LocalBusiness JSON-LD structured data on `index.html` (SEO Step 7) — done
+- [ ] Google Business Profile setup (SEO Step 8 — external, no code; next up)
 - [ ] Google Search Console registration (SEO Step 9 — verification tag + sitemap submit)
-- [ ] Open Graph tags (share previews)
+- [ ] Open Graph tags (share previews) — note: `index.html` already has basic `og:title`/`og:description`/`og:type`; still missing `og:image` and equivalents on other pages
 - [ ] "Install as App" (PWA)
 - [ ] Visitor analytics / Google Analytics (SEO Step 10)
 - [ ] Blog / Tips section
