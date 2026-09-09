@@ -43,7 +43,7 @@
 
 ## 🛡️ Security & Performance — Found in Site Scan (active — being planned/fixed)
 
-- [ ] **`portfolio.html` is ~4.9 MB** — portfolio images are embedded as inline base64 instead of being hosted as real image files/CDN assets. This makes the page very slow to load, especially on mobile, and also blocks giving it a unique title/meta description + canonical tag (SEO Steps 3–4) until it's fixed — the file is too large to safely rewrite in one piece right now. Move images to a public Supabase Storage bucket (or another CDN/host) and reference them with normal `<img src>` URLs instead. See `Safety and security.md` §5 for the detailed note.
+- [ ] **`portfolio.html` is ~4.9 MB** — portfolio images are embedded as inline base64 instead of being hosted as real image files/CDN assets. This makes the page very slow to load, especially on mobile, and also blocks giving it a unique title/meta description + canonical tag (SEO Steps 3–4) until it's fixed — the file is too large to safely rewrite in one piece right now. Move images to a public Supabase Storage bucket (or another CDN/host) and reference them with normal `<img src>` URLs instead. See `Safety and security.md` §5 for the detailed note. **Blocked right now:** the current chat session only has a GitHub connector available (no Supabase connector), so uploading images to Supabase Storage isn't possible from here yet — needs either a Supabase connector to be added, or the owner to upload the images manually and share the resulting URLs.
 - [ ] **Admin session token stored in `localStorage`** (`gd_admin_token` in `admin-login.html`) — vulnerable to theft via XSS since it isn't an httpOnly cookie. Full researched plan (move to `HttpOnly`/`Secure`/`SameSite=Lax` cookie + CSRF mitigation) is written up in `Safety and security.md` §3.1 — implement from there.
 - [ ] **No security response headers configured** — Netlify doesn't add CSP/X-Frame-Options/HSTS by default. A ready-to-use starter `_headers` file (with a Supabase- and inline-CSS-aware Content-Security-Policy) is written up in `Safety and security.md` §6 — copy it in once the production domain is finalized, starting with `Content-Security-Policy-Report-Only` before enforcing it.
 - [ ] **Zero automated tests** — everything is manually checked against `TESTING.md`'s checklist. A scoped plan for a small Playwright smoke-test suite (5–8 tests covering the highest-value flows, no CI required to start) is written up in `TESTING.md` under "Adding Automated Smoke Tests."
@@ -107,9 +107,9 @@
 - [x] Sitemap.xml + robots.txt (SEO Step 1–2)
 - [x] Unique `<title>` + meta description per public page (SEO Step 3) — done for `order.html`, `about.html`, `track-order.html`; `portfolio.html` blocked on Step 6 (see Security & Performance above)
 - [x] Canonical tags per page (SEO Step 4) — done for `index.html`, `order.html`, `about.html`, `track-order.html`; `portfolio.html` blocked on Step 6
-- [ ] Favicon / app icon (SEO Step 5 — next up)
-- [ ] Move `portfolio.html` base64 images to hosted files (SEO Step 6, shared with Security & Performance section above)
-- [ ] LocalBusiness JSON-LD structured data on `index.html` (SEO Step 7)
+- [ ] **Favicon / app icon (SEO Step 5) — PAUSED, waiting on the owner.** Owner is designing a custom brand logo/icon (matching the site's brick-red/mustard, print-stamp-inspired look) and will share the final image when ready. Do not generate a placeholder favicon in the meantime — wait for the real one.
+- [ ] Move `portfolio.html` base64 images to hosted files (SEO Step 6, shared with Security & Performance section above) — blocked on Supabase connector access, see note above
+- [ ] LocalBusiness JSON-LD structured data on `index.html` (SEO Step 7 — next up, does not depend on the logo or Supabase access)
 - [ ] Google Business Profile setup (SEO Step 8 — external, no code)
 - [ ] Google Search Console registration (SEO Step 9 — verification tag + sitemap submit)
 - [ ] Open Graph tags (share previews)
