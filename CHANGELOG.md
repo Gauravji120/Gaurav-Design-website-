@@ -2,6 +2,21 @@
 
 History of what was built, newest first. **Note: entries here are not currently timestamped with actual dates** — this is a known documentation gap (see `README.md`). If a real date for a past entry becomes known, add it; otherwise don't guess one. For a properly dated record specifically for production incidents, see `INCIDENT-LOG.md`. New entries added to this file going forward should include a real date if known at the time of writing.
 
+## SEO: LocalBusiness Structured Data (2026-09-09)
+
+Continued the SEO plan from `SEO.md` — Step 7 (Step 5 favicon paused pending the owner's custom logo; Step 6 portfolio image migration blocked on Supabase connector access — both skipped for now, see `ROADMAP.md`).
+
+**Added**
+- `<script type="application/ld+json">` LocalBusiness structured data block added to `index.html`'s `<head>`, with name, description, URL, email, phone, price range (₹99–₹599), address (Burari, Delhi, IN), area served, and founder — gives Google and AI answer engines exact facts instead of having to infer them from page text
+
+**Found (not fixed this session, logged for later)**
+- `index.html`'s dark-mode toggle references undefined `SUN_ICON`/`MOON_ICON` constants — clicking it shows literal "undefined" text instead of an icon. See `INCIDENT-LOG.md`'s 2026-09-09 entry and `ROADMAP.md`'s Security & Performance section.
+
+**Next up (per `SEO.md`'s priority order)**
+- Google Business Profile + Search Console (Steps 8–9, external, no code)
+- Favicon (Step 5, once the owner's logo is ready)
+- Move `portfolio.html`'s base64 images to hosted files (Step 6, once Supabase access is available)
+
 ## SEO: Canonical Tags (2026-09-09)
 
 Continued the SEO plan from `SEO.md` — Step 4.
@@ -11,12 +26,6 @@ Continued the SEO plan from `SEO.md` — Step 4.
 
 **Deferred**
 - `portfolio.html` still not touched — same reason as the Step 3 title/description work: the file is ~4.9 MB and unsafe to rewrite until its base64 images are moved out (SEO Step 6).
-
-**Next up (per `SEO.md`'s priority order)**
-- Favicon (Step 5)
-- Move `portfolio.html`'s base64 images to hosted files (Step 6)
-- LocalBusiness JSON-LD structured data (Step 7)
-- Google Business Profile + Search Console (Steps 8–9, external, no code)
 
 ## SEO: Unique Title + Meta Description per Public Page (2026-09-04)
 
