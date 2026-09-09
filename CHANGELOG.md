@@ -2,6 +2,22 @@
 
 History of what was built, newest first. **Note: entries here are not currently timestamped with actual dates** — this is a known documentation gap (see `README.md`). If a real date for a past entry becomes known, add it; otherwise don't guess one. For a properly dated record specifically for production incidents, see `INCIDENT-LOG.md`. New entries added to this file going forward should include a real date if known at the time of writing.
 
+## SEO: Canonical Tags (2026-09-09)
+
+Continued the SEO plan from `SEO.md` — Step 4.
+
+**Added**
+- `<link rel="canonical">` added to the `<head>` of `index.html`, `order.html`, `about.html`, and `track-order.html`, each pointing to its own full `https://goingbeyond.netlify.app/...` URL
+
+**Deferred**
+- `portfolio.html` still not touched — same reason as the Step 3 title/description work: the file is ~4.9 MB and unsafe to rewrite until its base64 images are moved out (SEO Step 6).
+
+**Next up (per `SEO.md`'s priority order)**
+- Favicon (Step 5)
+- Move `portfolio.html`'s base64 images to hosted files (Step 6)
+- LocalBusiness JSON-LD structured data (Step 7)
+- Google Business Profile + Search Console (Steps 8–9, external, no code)
+
 ## SEO: Unique Title + Meta Description per Public Page (2026-09-04)
 
 Continued the SEO plan from `SEO.md` — Step 3.
@@ -14,13 +30,6 @@ Continued the SEO plan from `SEO.md` — Step 3.
 
 **Deferred**
 - `portfolio.html` is not yet updated — see `INCIDENT-LOG.md`'s 2026-09-04 entry for why, and `ROADMAP.md`'s Security & Performance section for the plan to shrink it first (SEO Step 6) before editing its `<head>`.
-
-**Next up (per `SEO.md`'s priority order)**
-- Canonical tags (Step 4)
-- Favicon (Step 5)
-- Move `portfolio.html`'s base64 images to hosted files (Step 6)
-- LocalBusiness JSON-LD structured data (Step 7)
-- Google Business Profile + Search Console (Steps 8–9, external, no code)
 
 ## SEO: Sitemap + Robots.txt (2026-09-03)
 
