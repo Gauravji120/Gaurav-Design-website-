@@ -2,6 +2,25 @@
 
 History of what was built, newest first. **Note: entries here are not currently timestamped with actual dates** — this is a known documentation gap (see `README.md`). If a real date for a past entry becomes known, add it; otherwise don't guess one. For a properly dated record specifically for production incidents, see `INCIDENT-LOG.md`. New entries added to this file going forward should include a real date if known at the time of writing.
 
+## Security: Admin Session Moved from localStorage to an HttpOnly Cookie (2026-09-15)
+
+Closes an XSS token-theft risk flagged in `ROADMAP.md`'s Security & Performance list: the admin session token was previously stored in `localStorage`, readable by any JavaScript running on the page — including injected/malicious script.
+
+**Changed**
+- `netlify/functions/admin-login.mts` — the signed session token (unchanged: HMAC-SHA256, `ADMIN_SESSION_SECRET`, 6-hour expiry) is now set via a `Set-Cookie` response header (`gb_admin_session`, `HttpOnly; Secure; SameSite=Strict`) instead of being returned in the JSON response body.
+- `netlify/lib/verify-session.mts` — `getBearerToken()` now checks the `Authorization` header first (kept for compatibility), then falls back to reading the `gb_admin_session` cookie. This is the only backend change needed: every existing admin-only function (`admin-orders.mts`, `admin-settings.mts`, `admin-coupons.mts`, `admin-services.mts`, `admin-social-links.mts`, `admin-upload-qr.mts`, `admin-upload-delivery.mts`, `admin-order-messages.mts`, `admin-send-email.mts`, `admin-call-requests.mts`) already calls this shared helper, so all of them gained cookie support without being touched individually.
+- `admin-login.html` — no longer stores anything in `localStorage` on successful login; the cookie is already set by the browser from the response, so this is just a redirect now.
+- `admin.html` — removed the client-side token read/guard, `authHeaders()`'s manual `Authorization` header, and the `localStorage.removeItem` calls on logout/401. `apiFetch()` still redirects to the login page on a 401, which is now the only session-expiry signal the frontend needs. Logout calls a new endpoint (below) instead of just clearing local state.
+
+**Added**
+- `netlify/functions/admin-logout.mts` — new endpoint that clears the session by returning an expired `Set-Cookie` (`Max-Age=0`). Required because an HttpOnly cookie cannot be removed by client-side JavaScript — logout now has to be a real server round-trip rather than a local `localStorage.removeItem()`.
+
+**Also renamed for brand consistency (ROADMAP item, unrelated to the security fix but done in the same pass):** the old `gd-theme` dark-mode localStorage key (still present in `404.html`, `about.html`, `admin.html`, `admin-login.html`, `index.html`†, `order.html`, `payment.html`†, `portfolio.html`, `track-order.html`) renamed to `gb_theme`, matching the convention already used by every newer page (`account.html`, `login.html`, `orders.html`, etc.) — this was a real bug, not just cosmetic: dark-mode preference did not carry over between old and new pages before this fix. †`payment.html` and `index.html` both embed a large base64 sample-QR image inline, making them too large to safely hand-edit through this interface without risking corruption (as happened once already to `CHANGELOG.md` earlier this project — see git history); the owner applied the 2-line `gd-theme`→`gb_theme` rename to those two files manually via the GitHub web editor instead. `portfolio.html` was checked and does not use this key at all.
+
+**Verified after push:** re-fetched all 5 changed files directly from GitHub and confirmed zero remaining `gd_admin_token`/`localStorage` references in the admin auth flow, `gb_theme` still intact for dark mode, and the new cookie/logout code present exactly as intended.
+
+**Still open (from the same Security & Performance list):** move `portfolio.html`'s 48 base64-embedded images to Supabase Storage — blocked on not having a Storage-upload-capable tool available in this session; add security response headers (CSP, X-Frame-Options, HSTS) via a `_headers` file (already drafted in `Safety and security.md`); zero automated tests.
+
 ## Fixed: index.html Dark-Mode Toggle Undefined Icon Bug (2026-09-10)
 
 **Bug:** Clicking the dark-mode toggle on `index.html` (or loading the page with a saved dark-mode preference) showed the literal text "undefined" inside the button instead of a sun/moon icon.
