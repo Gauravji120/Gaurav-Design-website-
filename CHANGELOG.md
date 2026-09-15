@@ -2,6 +2,18 @@
 
 History of what was built, newest first. **Note: entries here are not currently timestamped with actual dates** — this is a known documentation gap (see `README.md`). If a real date for a past entry becomes known, add it; otherwise don't guess one. For a properly dated record specifically for production incidents, see `INCIDENT-LOG.md`. New entries added to this file going forward should include a real date if known at the time of writing.
 
+## Fixed: index.html Dark-Mode Toggle Undefined Icon Bug (2026-09-10)
+
+**Bug:** Clicking the dark-mode toggle on `index.html` (or loading the page with a saved dark-mode preference) showed the literal text "undefined" inside the button instead of a sun/moon icon.
+
+**Root cause:** The theme-toggle script referenced `SUN_ICON` and `MOON_ICON` constants that were never declared anywhere in the file — left over from an earlier, incomplete migration from emoji icons (🌙/☀️) to inline SVG icons (done correctly for the menu open/close buttons, but not finished for the theme toggle). See `INCIDENT-LOG.md`'s 2026-09-09 entry for the full write-up.
+
+**Fixed**
+- Defined `SUN_ICON` and `MOON_ICON` as inline SVG string constants (matching the stroke-based style already used for the menu icons — a sun-rays icon and a crescent-moon icon) directly above the theme-toggle logic in `index.html`
+- Verified via byte-size diff and a fresh fetch from GitHub that the fix applied cleanly with the rest of the file (LocalBusiness schema, canonical tag) intact
+
+**Follow-up still open:** live browser re-test of the toggle (this was verified by code inspection, not a browser click-test). Also, `about.html`, `404.html`, and `admin-login.html` still use the original emoji icons and haven't been migrated to SVG at all yet — tracked in `ROADMAP.md`.
+
 ## SEO: LocalBusiness Structured Data (2026-09-09)
 
 Continued the SEO plan from `SEO.md` — Step 7 (Step 5 favicon paused pending the owner's custom logo; Step 6 portfolio image migration blocked on Supabase connector access — both skipped for now, see `ROADMAP.md`).
@@ -9,8 +21,8 @@ Continued the SEO plan from `SEO.md` — Step 7 (Step 5 favicon paused pending t
 **Added**
 - `<script type="application/ld+json">` LocalBusiness structured data block added to `index.html`'s `<head>`, with name, description, URL, email, phone, price range (₹99–₹599), address (Burari, Delhi, IN), area served, and founder — gives Google and AI answer engines exact facts instead of having to infer them from page text
 
-**Found (not fixed this session, logged for later)**
-- `index.html`'s dark-mode toggle references undefined `SUN_ICON`/`MOON_ICON` constants — clicking it shows literal "undefined" text instead of an icon. See `INCIDENT-LOG.md`'s 2026-09-09 entry and `ROADMAP.md`'s Security & Performance section.
+**Found (fixed 2026-09-10 — see entry above)**
+- `index.html`'s dark-mode toggle referenced undefined `SUN_ICON`/`MOON_ICON` constants — clicking it showed literal "undefined" text instead of an icon.
 
 **Next up (per `SEO.md`'s priority order)**
 - Google Business Profile + Search Console (Steps 8–9, external, no code)
