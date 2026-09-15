@@ -301,32 +301,31 @@
 
 <script>
   // ===== Session guard =====
-  const token = localStorage.getItem('gb_admin_token');
-  const tokenExp = Number(localStorage.getItem('gb_admin_token_exp') || 0);
-  if (!token || Date.now() > tokenExp) {
-    localStorage.removeItem('gb_admin_token');
-    localStorage.removeItem('gb_admin_token_exp');
-    window.location.href = 'admin-login.html';
-  }
+  // The session token now lives in an HttpOnly cookie set by admin-login.mts
+  // — it's attached automatically by the browser on same-origin requests, so
+  // there is no client-side token to read, store, or attach by hand anymore.
+  // If the cookie is missing or expired, the very first API call below
+  // (loadOverview, at the bottom of this script) gets a 401 and apiFetch()
+  // redirects to the login page.
 
   function authHeaders(extra){
-    return Object.assign({ 'Authorization': 'Bearer ' + token }, extra || {});
+    return extra || {};
   }
 
   async function apiFetch(url, options){
     const res = await fetch(url, options);
     if (res.status === 401) {
-      localStorage.removeItem('gb_admin_token');
-      localStorage.removeItem('gb_admin_token_exp');
       window.location.href = 'admin-login.html';
       throw new Error('Session expired');
     }
     return res;
   }
 
-  document.getElementById('logoutBtn').addEventListener('click', () => {
-    localStorage.removeItem('gb_admin_token');
-    localStorage.removeItem('gb_admin_token_exp');
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    // Clearing an HttpOnly cookie has to happen server-side — JS can't touch
+    // it directly — so logout calls an endpoint that sends back an expired
+    // Set-Cookie header.
+    try { await fetch('/api/admin-logout', { method: 'POST' }); } catch(e) {}
     window.location.href = 'admin-login.html';
   });
 
