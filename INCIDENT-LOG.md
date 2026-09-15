@@ -27,3 +27,35 @@ Log format for each entry:
 - **Root cause:** GitHub's file-update API (`create_or_update_file`) always replaces a file's entire content with whatever is sent — it has no partial-patch mode. The edit was mistakenly sent as if it were a small patch (just the two changed lines) instead of the complete file with those two lines changed.
 - **Fix:** Reconstructed the full original `order.html` locally, applied only the intended title/description change within it, verified the reconstructed file's byte size and structure matched the original (DOCTYPE start, `</html>` end, exactly one `<title>` and one meta description) before pushing, then pushed the corrected full file as a follow-up commit.
 - **Follow-up / prevention:** For any file-based edit tool that requires sending the full file content (as opposed to a true patch/diff API), always fetch the current full content first, make the change against that full copy, and verify the result's size/structure before pushing — never send just the changed fragment. This applies especially to large HTML files like `order.html`, `about.html`, `track-order.html`, and eventually `portfolio.html`.
+
+## Historical incidents (from CHANGELOG.md, exact dates not recorded)
+
+## Admin RLS gap
+- **What happened:** Data intended to be admin-only was reachable in a way that didn't match the intended security model.
+- **Root cause:** A table or policy did not have RLS locked down the way the rest of the schema assumes (see `Safety and security.md` §2 for the standard every table should meet).
+- **Fix:** RLS policy corrected so only `service_role` (used inside Netlify Functions) can access the data.
+- **Follow-up / prevention:** Run the RLS verification query in `Safety and security.md` §2 after every new table or schema change, not just at initial setup.
+
+## QR-bucket exposure
+- **What happened:** The Instagram QR code storage bucket was not scoped the way the rest of the storage buckets are.
+- **Root cause:** Storage bucket policies are separate from database RLS and were not audited the same way.
+- **Fix:** Bucket policy corrected; `qr-codes` remains the one intentionally-public bucket, others confirmed private.
+- **Follow-up / prevention:** Whenever a new bucket is added, explicitly verify it's private unless there's a specific reason (like `qr-codes`) for it to be public.
+
+## Core Backend Build — functions not deploying
+- **What happened:** After a push, some Netlify Functions did not appear to be live, despite the code being merged into `main`.
+- **Root cause:** The Netlify build did not pick up the expected number of functions during that deploy.
+- **Fix:** Redeploy triggered; function count confirmed in the Netlify deploy log afterward.
+- **Follow-up / prevention:** Always check the Netlify deploy log's function count after pushing (see `DEPLOYMENT.md` — "After Pushing").
+
+## Email provider switch (Resend → Brevo)
+- **What happened:** Email sending broke or needed migrating.
+- **Root cause:** `RESEND_API_KEY` was replaced by `BREVO_API_KEY` as the project moved providers; environment variable names are case-sensitive, which has caused confusion here before.
+- **Fix:** All email-sending code routed through the shared `send-email.mts` helper using `BREVO_API_KEY`. `RESEND_API_KEY` retired (see `ENVIRONMENT-VARIABLES.md`).
+- **Follow-up / prevention:** Never hardcode a provider-specific key directly in a function — always go through the shared helper so a future provider switch only requires one change.
+
+---
+
+## Later Incidents
+
+*(Add new entries above this line, most recent first, using the format at the top of this file.)*
