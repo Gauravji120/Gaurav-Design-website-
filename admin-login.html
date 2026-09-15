@@ -124,12 +124,10 @@
         return;
       }
 
-      // Store the session token for the Admin Dashboard to use
-      try {
-        localStorage.setItem('gb_admin_token', data.token);
-        localStorage.setItem('gb_admin_token_exp', String(data.expiresAt));
-      } catch(e) {}
-
+      // The session token is now set as an HttpOnly cookie by the server —
+      // there's nothing to store client-side. The browser already attached
+      // the cookie from the response, and will send it automatically on
+      // every request to this site from here on.
       loginBtn.textContent = 'Success — redirecting…';
       window.location.href = 'admin.html';
 
