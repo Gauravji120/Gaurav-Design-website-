@@ -112,9 +112,23 @@ export default async (req: Request, context: Context) => {
     const signature = await hmacSign(SESSION_SECRET, payload);
     const token = `${payload}.${signature}`;
 
-    return new Response(JSON.stringify({ success: true, token, expiresAt: exp }), {
+    // 6. Set the session token as an HttpOnly cookie instead of returning it in
+    // the JSON body — this means client-side JavaScript can never read it,
+    // which closes off token theft via XSS. The browser attaches it
+    // automatically on same-origin requests, so the Admin Dashboard no longer
+    // needs to store or manually attach an Authorization header.
+    const cookie = [
+      `gb_admin_session=${encodeURIComponent(token)}`,
+      "Path=/",
+      "HttpOnly",
+      "Secure",
+      "SameSite=Strict",
+      `Max-Age=${SESSION_HOURS * 3600}`,
+    ].join("; ");
+
+    return new Response(JSON.stringify({ success: true, expiresAt: exp }), {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "Set-Cookie": cookie },
     });
   } catch (err) {
     console.error("admin-login error:", err);

@@ -54,9 +54,24 @@ export async function verifySession(
   }
 }
 
-/** Extracts the bearer token from a request's Authorization header. */
+/**
+ * Extracts the admin session token from a request — checks the Authorization
+ * header first (kept for compatibility with any direct API callers), then
+ * falls back to the HttpOnly gb_admin_session cookie set by admin-login.mts.
+ * The cookie is the primary mechanism the Admin Dashboard now uses: it can't
+ * be read or stolen by JavaScript (XSS), unlike the old approach of storing
+ * the token in localStorage.
+ */
 export function getBearerToken(req: Request): string | null {
   const header = req.headers.get("authorization") || req.headers.get("Authorization");
-  if (!header || !header.startsWith("Bearer ")) return null;
-  return header.slice(7).trim();
+  if (header && header.startsWith("Bearer ")) return header.slice(7).trim();
+
+  const cookieHeader = req.headers.get("cookie") || req.headers.get("Cookie") || "";
+  const match = cookieHeader
+    .split(";")
+    .map((c) => c.trim())
+    .find((c) => c.startsWith("gb_admin_session="));
+  if (match) return decodeURIComponent(match.slice("gb_admin_session=".length));
+
+  return null;
 }
