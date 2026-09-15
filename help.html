@@ -51,9 +51,9 @@
 <body data-theme="light">
 <header class="nav">
   <div class="nav-inner">
-    <a href="account.html" class="back-link">← My Account</a>
+    <a href="account.html" class="back-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg> My Account</a>
     <div class="brand">GOING BEYOND</div>
-    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg></button>
   </div>
 </header>
 <div class="page-head">
@@ -98,14 +98,16 @@
 </div>
 <footer><p>&copy; Going Beyond</p></footer>
 <script>
+  const MOON_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>';
+  const SUN_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
   const themeToggle = document.getElementById('themeToggle');
   const savedTheme = localStorage.getItem('gb_theme');
-  if (savedTheme) { document.body.setAttribute('data-theme', savedTheme); themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙'; }
+  if (savedTheme) { document.body.setAttribute('data-theme', savedTheme); themeToggle.innerHTML = savedTheme === 'dark' ? SUN_ICON : MOON_ICON; }
   themeToggle.addEventListener('click', () => {
     const isDark = document.body.getAttribute('data-theme') === 'dark';
     const next = isDark ? 'light' : 'dark';
     document.body.setAttribute('data-theme', next);
-    themeToggle.textContent = isDark ? '🌙' : '☀️';
+    themeToggle.innerHTML = isDark ? MOON_ICON : SUN_ICON;
     localStorage.setItem('gb_theme', next);
   });
 </script>
