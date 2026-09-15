@@ -70,7 +70,8 @@ Public (no auth required to call, but most require a valid Supabase client acces
 - `track-order.mts` — guest-style lookup, requires order_number **and** matching phone (prevents guessing someone else's order by ID alone). Still present alongside the logged-in My Orders flow — see ROADMAP for its status.
 - `get-site-settings.mts` — returns prices/offer/UPI/social links/services. Public and read-only by design (nothing sensitive).
 - `validate-coupon.mts` — coupon check used for the live "Apply" button on the order form (submit-order re-validates independently — this one is just for UX feedback).
-- `admin-login.mts` — rate-limited, generic error message on failure, issues a signed session token (HMAC-SHA256, `ADMIN_SESSION_SECRET`), no forgot-password flow (single fixed admin, reset happens directly in DB if ever needed).
+- `admin-login.mts` — rate-limited, generic error message on failure, issues a signed session token (HMAC-SHA256, `ADMIN_SESSION_SECRET`), set as an HttpOnly cookie (see Session/Auth Model below) rather than returned in the response body. No forgot-password flow (single fixed admin, reset happens directly in DB if ever needed).
+- `admin-logout.mts` — clears the admin session cookie by returning an expired `Set-Cookie` header. Exists because an HttpOnly cookie can't be removed by client-side JavaScript — logout has to be a real server round-trip.
 - `get-order-total.mts` — public, returns only order_number/service/quantity/total_price/payment_status for the Payment page (deliberately excludes name/phone/email/details).
 - `my-orders.mts` — requires a logged-in client; verifies their Supabase access token server-side, then returns only their own orders (looked up with the service role key — the public site never queries `orders` directly, and this rule holds for logged-in clients too), plus a signed download URL for any order with a delivered file.
 - `book-call.mts` — requires a logged-in client; inserts a row into `call_requests` and emails the admin via Brevo.
@@ -80,7 +81,7 @@ Public (no auth required to call, but most require a valid Supabase client acces
 - `order-messages.mts` (GET/POST) — requires a logged-in client; confirms the order actually belongs to them before returning or accepting messages; supports an optional file attachment.
 - `request-revision.mts` — requires a logged-in client; confirms the order belongs to them before setting `revision_requested`; emails the admin.
 
-Admin-only (require a valid session token via `verify-session.mts`):
+Admin-only (require a valid session — cookie or, for compatibility, an Authorization header — verified via `verify-session.mts`):
 - `admin-orders.mts` — list/search orders, generates signed reference-file URLs, and (via PATCH) updates status/payment_status, clears a revision flag, or manually triggers a review/referral-request email — sends the appropriate templated email to the client for each of these, respecting their notification preference.
 - `admin-settings.mts` — update offer/UPI/whatsapp fields (allow-listed fields only).
 - `admin-coupons.mts` — CRUD coupons.
@@ -96,11 +97,14 @@ Admin-only (require a valid session token via `verify-session.mts`):
 
 There are now **two separate, non-interchangeable auth systems** in this project:
 
-**1. Admin auth (custom, unchanged):**
+**1. Admin auth (custom, HttpOnly cookie — changed from localStorage):**
 1. `verify_admin_login()` Postgres function compares password hash inside the DB.
 2. On success, `admin-login.mts` issues a stateless signed token: `base64url(json).signature`, HMAC-SHA256 with `ADMIN_SESSION_SECRET`, 6-hour expiry.
-3. Frontend stores it in `localStorage` (`gd_admin_token`).
-4. Every admin function independently re-verifies the token server-side via `verify-session.mts` — the frontend guard is not the real security boundary, the backend check is.
+3. The token is set as an **HttpOnly, Secure, SameSite=Strict cookie** (`gb_admin_session`) via a `Set-Cookie` response header — it is *not* returned in the JSON body and is never stored in `localStorage`. This closes off token theft via XSS: client-side JavaScript has no way to read, copy, or exfiltrate the token, because the browser withholds HttpOnly cookies from `document.cookie` and from any JS-visible response data entirely.
+4. The browser attaches the cookie automatically on same-origin requests, so `admin.html` no longer builds an `Authorization` header by hand — `authHeaders()`/`apiFetch()` just make plain `fetch()` calls.
+5. `netlify/lib/verify-session.mts`'s `getBearerToken()` checks the `Authorization` header first (kept only for compatibility with any direct API caller), then falls back to reading the `gb_admin_session` cookie — so every admin-only function above gets cookie support for free, with no per-function changes needed.
+6. Logging out calls `admin-logout.mts`, which returns an expired `Set-Cookie` (`Max-Age=0`) — the only way to clear an HttpOnly cookie, since JS can't touch it directly.
+7. Every admin function independently re-verifies the token server-side via `verify-session.mts` regardless of how it arrived — the frontend guard is not the real security boundary, the backend check is.
 
 **2. Client auth (real Supabase Auth — now live, not just planned):**
 1. `login.html` offers Google OAuth (`sb.auth.signInWithOAuth`) and a passwordless email magic link (`sb.auth.signInWithOtp`, `shouldCreateUser: true` — first login also creates the account, no separate signup flow needed).
@@ -116,6 +120,7 @@ There are now **two separate, non-interchangeable auth systems** in this project
 ## Security Checklist Applied
 
 - RLS on every table, no public policies — service role only.
+- Admin session token lives in an HttpOnly, Secure, SameSite=Strict cookie, never in `localStorage` — not readable by client-side JavaScript, closing off theft via XSS.
 - Coupon discount and price are always recalculated server-side, never trusted from the browser.
 - Loyalty point redemption is always re-validated against the client's real, server-computed balance — never trusted from the browser.
 - Track Order requires two matching pieces of info (order number + phone), not just a guessable ID.
